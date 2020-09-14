@@ -6,7 +6,6 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/lib/pq"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -31,7 +30,7 @@ func (c *Customer) Create(ctx context.Context, req *cutomerpb.CustomerCreateRequ
 			}
 		}
 
-		logger.Error("customer insert error", zap.Any("error", errors.WithStack(err)))
+		logger.Error("customer insert error", zap.Any("error", err))
 		return nil, status.Error(codes.Internal, "customer create error")
 	}
 

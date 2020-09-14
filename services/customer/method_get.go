@@ -6,7 +6,6 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -30,7 +29,7 @@ func (c *Customer) Get(ctx context.Context, req *cutomerpb.CustomerGetRequest) (
 			return nil, status.Error(codes.NotFound, "customer not found")
 		}
 
-		logger.Error("customer select error", zap.Any("error", errors.WithStack(err)))
+		logger.Error("customer select error", zap.Any("error", err))
 		return nil, status.Error(codes.Internal, "customer get error")
 	}
 
