@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/Ultimate-Super-WebDev-Corp/server/servicesbp/cutomerpb"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/servicesbp/cutomerpb"
 )
 
 func (c *Customer) Get(ctx context.Context, req *cutomerpb.CustomerGetRequest) (*cutomerpb.CustomerResponse, error) {

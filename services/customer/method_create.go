@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/Ultimate-Super-WebDev-Corp/server/servicesbp/cutomerpb"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/servicesbp/cutomerpb"
 )
 
 const customerTableName = "customer"

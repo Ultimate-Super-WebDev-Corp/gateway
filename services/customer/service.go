@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
-	"github.com/Ultimate-Super-WebDev-Corp/server/servicesbp/cutomerpb"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/servicesbp/cutomerpb"
 )
 
 type Customer struct {
@@ -23,7 +23,8 @@ type config struct {
 type Dependences struct {
 	Registrar grpc.ServiceRegistrar
 }
-func NewCustomer(dep Dependences)  error {
+
+func NewCustomer(dep Dependences) error {
 	cfg := config{}
 	if err := env.Parse(&cfg); err != nil {
 		return errors.WithStack(err)
@@ -31,11 +32,11 @@ func NewCustomer(dep Dependences)  error {
 
 	customerDB, err := sql.Open("postgres", cfg.CustomerDB)
 	if err != nil {
-		return  errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	if err := customerDB.Ping(); err != nil {
-		return  errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	cus := &Customer{

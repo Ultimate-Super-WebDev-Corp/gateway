@@ -1,4 +1,4 @@
-module github.com/Ultimate-Super-WebDev-Corp/server
+module github.com/Ultimate-Super-WebDev-Corp/gateway
 
 go 1.15
 
