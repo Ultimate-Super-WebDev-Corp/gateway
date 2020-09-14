@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  customer_postgres:
+    image: postgres:9.6.19
+    environment:
+      POSTGRES_DB: customer
+      POSTGRES_USER: customer
+      POSTGRES_PASSWORD: customer
+    ports:
+    - 5432:5432

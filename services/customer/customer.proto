@@ -1,0 +1,29 @@
+syntax = "proto3";
+package customer;
+
+import "google/protobuf/empty.proto";
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+option go_package = "servicesbp/cutomerpb";
+
+service Customer {
+  rpc Create (CustomerCreateRequest) returns (google.protobuf.Empty) {}
+  rpc Get (CustomerGetRequest) returns (CustomerResponse) {}
+}
+
+message CustomerCreateRequest {
+  string Email = 1[(validator.field) = {regex : "^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,4}$"}];
+  string Password = 2 [(validator.field) = {regex : "^.{4,}$"}];
+  string Name = 3 [(validator.field) = {string_not_empty : true}];
+}
+
+message CustomerGetRequest {
+  string Email = 1[(validator.field) = {regex : "^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,4}$"}];
+  string Password = 2 [(validator.field) = {regex : "^.{4,}$"}];
+}
+
+message CustomerResponse {
+  uint64 Id = 1;
+  string Email = 2[(validator.field) = {regex : "^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,4}$"}];
+  string Name = 4 [(validator.field) = {string_not_empty : true}];
+}
