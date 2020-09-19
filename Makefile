@@ -1,7 +1,6 @@
-tag = dev
-
 generate:
-	protoc --proto_path=${GOPATH}/src --proto_path=./ --go_out=./ --go-grpc_out=./ --govalidators_out=. ./services/*/*.proto
+	find ./services -type f -iname "*.proto" -exec \
+	protoc --proto_path=${GOPATH}/src --proto_path=./ --go_out=plugins=grpc:./ --govalidators_out=. {} \;
 
 test:
 	go test -cover ./...
@@ -15,15 +14,8 @@ down:
 get_project_dependencies:
 	#todo add installation of protoc if it doesn't exist
 	GO111MODULE=on go get github.com/mwitkow/go-proto-validators/protoc-gen-govalidators
-	GO111MODULE=on go get -tags 'postgres' -u github.com/golang-migrate/migrate/cmd/migrate
 
 curl:
-	grpc-client-cli \
-	--proto ./services/*/*.proto \
+	$(eval proto_cmd :=$(shell find ./services -type f -iname "*.proto" -exec printf " --proto {}" \;))
+	grpc-client-cli $(proto_cmd) \
 	--protoimports ${GOPATH}/src 0.0.0.0:8080
-
-create_migrate:
-	migrate create -ext sql -dir migrations/$(service) -seq $(migrate_name)
-
-up_migrate_local: #todo move to docker-compose
-	migrate -database postgresql://customer:customer@localhost:5432/customer?sslmode=disable -path ./migrations/customer up

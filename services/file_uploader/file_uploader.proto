@@ -1,0 +1,28 @@
+syntax = "proto3";
+package file_uploader;
+
+option go_package = "gen/services/file_uploader";
+
+service FileUploader {
+  rpc Upload (stream Chunk) returns (FileUploaderResponse) {}
+}
+
+message Chunk {
+  oneof oneOfChunk {
+    bytes chunk = 1;
+    Metadata meta = 2;
+  }
+}
+
+message FileUploaderResponse {
+    string UUID = 1;
+}
+
+message Metadata{
+    FileType type = 1;
+}
+
+enum FileType{
+  UNDEFINED = 0;
+  JPEG = 1;
+}
