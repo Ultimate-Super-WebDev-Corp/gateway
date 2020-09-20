@@ -1,6 +1,6 @@
 # server
 
-#Installation
+# Installation
 
 ```
 make up
