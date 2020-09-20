@@ -1,0 +1,39 @@
+syntax = "proto3";
+package file;
+
+option go_package = "gen/services/file";
+
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+service File {
+  rpc Upload (stream Chunk) returns (FileUploadResponse) {}
+  rpc GetFileURLs (FileUUIDs) returns (FileURLs) {}
+}
+
+message FileUUIDs {
+    repeated string UUIDs = 1[(validator.field) ={repeated_count_min: 1}];
+}
+
+message FileURLs {
+  repeated string URLs = 1;
+}
+
+message Chunk {
+  oneof oneOfChunk {
+    bytes Chunk = 1;
+    FileMetadata Meta = 2;
+  }
+}
+
+message FileUploadResponse {
+    string UUID = 1;
+}
+
+message FileMetadata {
+    FileType Type = 1;
+}
+
+enum FileType {
+  UNDEFINED = 0;
+  JPEG = 1;
+}

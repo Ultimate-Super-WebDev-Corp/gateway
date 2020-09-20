@@ -1,4 +1,4 @@
-package file_uploader
+package file
 
 import (
 	"io"
@@ -7,10 +7,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file_uploader"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
 )
 
-func (fu FileUploader) Upload(stream file_uploader.FileUploader_UploadServer) error {
+func (fu File) Upload(stream file.File_UploadServer) error {
 	pr, pw := io.Pipe()
 	defer func() {
 		_ = pr.Close()
@@ -19,7 +19,7 @@ func (fu FileUploader) Upload(stream file_uploader.FileUploader_UploadServer) er
 	logger := ctxzap.Extract(stream.Context())
 
 	var wasMeta bool
-	var msg *file_uploader.Chunk
+	var msg *file.Chunk
 	var fileUuid string
 	var err, errS3 error
 	var asyncOk bool
@@ -35,7 +35,7 @@ func (fu FileUploader) Upload(stream file_uploader.FileUploader_UploadServer) er
 		}
 
 		switch ch := msg.OneOfChunk.(type) {
-		case *file_uploader.Chunk_Meta:
+		case *file.Chunk_Meta:
 			if !wasMeta {
 				wasMeta = true
 				asyncResp = fu.asyncUploadToS3(pr, ch.Meta)
@@ -43,7 +43,10 @@ func (fu FileUploader) Upload(stream file_uploader.FileUploader_UploadServer) er
 				logger.Error("metadata must be sent only once")
 			}
 
-		case *file_uploader.Chunk_Chunk:
+		case *file.Chunk_Chunk:
+			if !wasMeta {
+				return status.Error(codes.InvalidArgument, "the first message must be metadata")
+			}
 			if _, errWrite := pw.Write(ch.Chunk); errWrite != nil {
 				return status.Error(codes.InvalidArgument, errWrite.Error())
 			}
@@ -66,5 +69,5 @@ func (fu FileUploader) Upload(stream file_uploader.FileUploader_UploadServer) er
 		return status.Error(codes.Internal, errS3.Error())
 	}
 
-	return stream.SendAndClose(&file_uploader.FileUploaderResponse{UUID: fileUuid})
+	return stream.SendAndClose(&file.FileUploadResponse{UUID: fileUuid})
 }

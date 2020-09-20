@@ -1,4 +1,4 @@
-package file_uploader
+package file
 
 import (
 	"io"
@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file_uploader"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
 )
 
 type asyncUploadToS3Response struct {
@@ -37,12 +37,12 @@ func (r asyncUploadToS3Response) getNotBlocking() (string, error, bool) {
 	}
 }
 
-func (fu FileUploader) asyncUploadToS3(body io.Reader, meta *file_uploader.Metadata) asyncUploadToS3Response {
+func (fu File) asyncUploadToS3(body io.Reader, meta *file.FileMetadata) asyncUploadToS3Response {
 	resp := asyncUploadToS3Response{
 		err:  make(chan error, 1),
 		uuid: make(chan string, 1),
 	}
-	go func(body io.Reader, resp asyncUploadToS3Response, meta *file_uploader.Metadata) {
+	go func(body io.Reader, resp asyncUploadToS3Response, meta *file.FileMetadata) {
 		defer func() {
 			if p := recover(); p != nil {
 				resp.err <- errors.Errorf("recovering from panic %v", p)
@@ -60,11 +60,11 @@ func (fu FileUploader) asyncUploadToS3(body io.Reader, meta *file_uploader.Metad
 	return resp
 }
 
-var fileTypeToContentType = map[file_uploader.FileType]string{
-	file_uploader.FileType_JPEG: "image/jpeg",
+var fileTypeToContentType = map[file.FileType]string{
+	file.FileType_JPEG: "image/jpeg",
 }
 
-func (fu FileUploader) uploadToS3(body io.Reader, meta *file_uploader.Metadata) (string, error) {
+func (fu File) uploadToS3(body io.Reader, meta *file.FileMetadata) (string, error) {
 	contentType := fileTypeToContentType[meta.Type]
 	if contentType == "" {
 		return "", errors.New("unknown file type")

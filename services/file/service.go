@@ -1,19 +1,21 @@
-package file_uploader
+package file
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/caarlos0/env/v6"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file_uploader"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
 )
 
-type FileUploader struct {
+type File struct {
 	s3Uploader *s3manager.Uploader
+	s3Client   *s3.S3
 	s3Bucket   string
 }
 
@@ -29,10 +31,10 @@ type Dependences struct {
 	Registrar *grpc.Server
 }
 
-func NewFileUploader(dep Dependences) error {
+func NewFile(dep Dependences) (file.FileServer, error) {
 	cfg := config{}
 	if err := env.Parse(&cfg); err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	s3Config := &aws.Config{
@@ -45,15 +47,16 @@ func NewFileUploader(dep Dependences) error {
 
 	newSession, err := session.NewSession(s3Config)
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
-	fu := &FileUploader{
+	fu := &File{
 		s3Uploader: s3manager.NewUploader(newSession),
+		s3Client:   s3.New(newSession),
 		s3Bucket:   cfg.S3BucketName,
 	}
 
-	file_uploader.RegisterFileUploaderServer(dep.Registrar, fu)
+	file.RegisterFileServer(dep.Registrar, fu)
 
-	return nil
+	return fu, nil
 }

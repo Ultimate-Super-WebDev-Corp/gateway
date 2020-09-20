@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/file_uploader"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/file"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/search"
 )
 
@@ -12,15 +12,18 @@ func main() {
 		panic(err)
 	}
 
-	if err := search.NewSearch(search.Dependences{
+	fileSrv, err := file.NewFile(file.Dependences{
 		Registrar: srv.RpcServer,
-	}); err != nil {
+	})
+	if err != nil {
 		panic(err)
 	}
 
-	if err := file_uploader.NewFileUploader(file_uploader.Dependences{
+	err = search.NewSearch(search.Dependences{
 		Registrar: srv.RpcServer,
-	}); err != nil {
+		FileSrv:   fileSrv,
+	})
+	if err != nil {
 		panic(err)
 	}
 
