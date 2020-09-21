@@ -2,7 +2,11 @@ package file
 
 import (
 	"io"
+	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -11,6 +15,15 @@ import (
 )
 
 func (fu File) Upload(stream file.File_UploadServer) error {
+	partition := time.Now().Format("20060102")
+	bucket := makeBucketName(fu.s3Bucket, partition)
+
+	if _, err := fu.s3Client.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String(bucket),
+	}); err != nil && !isBucketExists(err) {
+		return status.Error(codes.Internal, err.Error())
+	}
+
 	pr, pw := io.Pipe()
 	defer func() {
 		_ = pr.Close()
@@ -38,7 +51,7 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 		case *file.Chunk_Meta:
 			if !wasMeta {
 				wasMeta = true
-				asyncResp = fu.asyncUploadToS3(pr, ch.Meta)
+				asyncResp = fu.asyncUploadToS3(bucket, pr, ch.Meta)
 			} else {
 				logger.Error("metadata must be sent only once")
 			}
@@ -70,4 +83,17 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 	}
 
 	return stream.SendAndClose(&file.FileUploadResponse{UUID: fileUuid})
+}
+
+func isBucketExists(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errAws, ok := err.(awserr.Error)
+	if !ok {
+		return false
+	}
+	return errAws.Code() == s3.ErrCodeBucketAlreadyOwnedByYou ||
+		errAws.Code() == s3.ErrCodeBucketAlreadyExists
 }

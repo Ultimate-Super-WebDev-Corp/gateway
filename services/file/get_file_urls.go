@@ -13,10 +13,16 @@ import (
 )
 
 func (fu File) GetFileURLs(_ context.Context, msg *file.FileUUIDs) (*file.FileURLs, error) {
+
 	urls := make([]string, 0, len(msg.UUIDs))
 	for _, uuid := range msg.UUIDs {
+		partition, err := getPartition(uuid)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
 		s3GetReq, _ := fu.s3Client.GetObjectRequest(&s3.GetObjectInput{
-			Bucket: aws.String(fu.s3Bucket),
+			Bucket: aws.String(makeBucketName(fu.s3Bucket, partition)),
 			Key:    aws.String(uuid),
 		})
 		url, err := s3GetReq.Presign(15 * time.Minute)

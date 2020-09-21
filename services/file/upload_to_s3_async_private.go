@@ -37,12 +37,12 @@ func (r asyncUploadToS3Response) getNotBlocking() (string, error, bool) {
 	}
 }
 
-func (fu File) asyncUploadToS3(body io.Reader, meta *file.FileMetadata) asyncUploadToS3Response {
+func (fu File) asyncUploadToS3(bucket string, body io.Reader, meta *file.FileMetadata) asyncUploadToS3Response {
 	resp := asyncUploadToS3Response{
 		err:  make(chan error, 1),
 		uuid: make(chan string, 1),
 	}
-	go func(body io.Reader, resp asyncUploadToS3Response, meta *file.FileMetadata) {
+	go func(bucket string, body io.Reader, resp asyncUploadToS3Response, meta *file.FileMetadata) {
 		defer func() {
 			if p := recover(); p != nil {
 				resp.err <- errors.Errorf("recovering from panic %v", p)
@@ -50,12 +50,12 @@ func (fu File) asyncUploadToS3(body io.Reader, meta *file.FileMetadata) asyncUpl
 			close(resp.err)
 			close(resp.uuid)
 		}()
-		if fileUuid, err := fu.uploadToS3(body, meta); err != nil {
+		if fileUuid, err := fu.uploadToS3(bucket, body, meta); err != nil {
 			resp.err <- err
 		} else {
 			resp.uuid <- fileUuid
 		}
-	}(body, resp, meta)
+	}(bucket, body, resp, meta)
 
 	return resp
 }
@@ -64,24 +64,30 @@ var fileTypeToContentType = map[file.FileType]string{
 	file.FileType_JPEG: "image/jpeg",
 }
 
-func (fu File) uploadToS3(body io.Reader, meta *file.FileMetadata) (string, error) {
+func (fu File) uploadToS3(bucket string, body io.Reader, meta *file.FileMetadata) (string, error) {
+	partition, err := getPartition(bucket)
+	if err != nil {
+		return "", err
+	}
+
 	contentType := fileTypeToContentType[meta.Type]
 	if contentType == "" {
 		return "", errors.New("unknown file type")
 	}
 
-	fileUUID, err := uuid.NewUUID()
+	UUID, err := uuid.NewUUID()
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
 
+	fileUUID := makeFileUUID(UUID.String(), partition)
 	_, err = fu.s3Uploader.Upload(&s3manager.UploadInput{
 		Body:        body,
-		Bucket:      aws.String(fu.s3Bucket),
-		Key:         aws.String(fileUUID.String()),
+		Bucket:      aws.String(bucket),
+		Key:         aws.String(makeFileUUID(UUID.String(), partition)),
 		Expires:     aws.Time(time.Now().UTC().Add(time.Hour)),
 		ContentType: aws.String(contentType),
 	})
 
-	return fileUUID.String(), errors.WithStack(err)
+	return fileUUID, errors.WithStack(err)
 }
