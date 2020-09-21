@@ -1,1 +1,7 @@
 # server
+
+# Installation
+
+```
+make up
+```
