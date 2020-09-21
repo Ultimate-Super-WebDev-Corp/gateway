@@ -9,3 +9,16 @@ services:
     ports:
       - 9000:9000
     command: server /data
+
+  gateway:
+    build: .
+    environment:
+      S3_ENDPOINT: http://s3:9000
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: miniominio
+      S3_REGION: us-east-1
+      S3_BUCKET_NAME: test
+    depends_on:
+      - s3
+    ports:
+    - 8080:8080

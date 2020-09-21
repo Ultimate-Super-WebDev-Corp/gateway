@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file_uploader"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
 )
 
 const (
@@ -22,16 +22,16 @@ func main() {
 	}
 	defer conn.Close()
 
-	c := file_uploader.NewFileUploaderClient(conn)
+	c := file.NewFileClient(conn)
 	stream, err := c.Upload(context.Background())
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
 
-	ch := &file_uploader.Chunk{
-		OneOfChunk: &file_uploader.Chunk_Meta{
-			Meta: &file_uploader.Metadata{
-				Type: file_uploader.FileType_JPEG,
+	ch := &file.Chunk{
+		OneOfChunk: &file.Chunk_Meta{
+			Meta: &file.FileMetadata{
+				Type: file.FileType_JPEG,
 			},
 		},
 	}
@@ -52,16 +52,16 @@ func main() {
 	}
 
 	l := len(res) / 2
-	ch = &file_uploader.Chunk{
-		OneOfChunk: &file_uploader.Chunk_Chunk{
+	ch = &file.Chunk{
+		OneOfChunk: &file.Chunk_Chunk{
 			Chunk: res[:l],
 		},
 	}
 
 	err = stream.Send(ch)
 
-	ch = &file_uploader.Chunk{
-		OneOfChunk: &file_uploader.Chunk_Chunk{
+	ch = &file.Chunk{
+		OneOfChunk: &file.Chunk_Chunk{
 			Chunk: res[l:],
 		},
 	}
