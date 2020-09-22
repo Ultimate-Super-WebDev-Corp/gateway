@@ -12,8 +12,14 @@ func main() {
 		panic(err)
 	}
 
-	fileSrv, err := file.NewFile(file.Dependences{
+	grpcConn, err := srv.GrpcDial()
+	if err != nil {
+		panic(err)
+	}
+
+	fileCli, err := file.NewFile(file.Dependences{
 		Registrar: srv.RpcServer,
+		GrpcConn:  grpcConn,
 	})
 	if err != nil {
 		panic(err)
@@ -21,7 +27,7 @@ func main() {
 
 	err = search.NewSearch(search.Dependences{
 		Registrar: srv.RpcServer,
-		FileSrv:   fileSrv,
+		FileCli:   fileCli,
 	})
 	if err != nil {
 		panic(err)

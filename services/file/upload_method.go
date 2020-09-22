@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"google.golang.org/grpc/codes"
@@ -40,8 +39,11 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 
 	for {
 		msg, err = stream.Recv()
-		if err != nil {
+		if err == io.EOF {
 			break
+		}
+		if err != nil {
+			return status.Error(codes.Internal, err.Error())
 		}
 		if fileUuid, errS3, asyncOk = asyncResp.getNotBlocking(); asyncOk {
 			break
@@ -69,11 +71,7 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 		}
 	}
 
-	if err != io.EOF && err != nil {
-		return status.Error(codes.Internal, err.Error())
-	} else {
-		_ = pw.Close()
-	}
+	_ = pw.Close()
 
 	if !asyncOk {
 		fileUuid, errS3 = asyncResp.get()
@@ -83,17 +81,4 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 	}
 
 	return stream.SendAndClose(&file.FileUploadResponse{UUID: fileUuid})
-}
-
-func isBucketExists(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	errAws, ok := err.(awserr.Error)
-	if !ok {
-		return false
-	}
-	return errAws.Code() == s3.ErrCodeBucketAlreadyOwnedByYou ||
-		errAws.Code() == s3.ErrCodeBucketAlreadyExists
 }

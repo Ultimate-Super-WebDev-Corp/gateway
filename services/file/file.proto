@@ -7,11 +7,11 @@ import "github.com/mwitkow/go-proto-validators/validator.proto";
 
 service File {
   rpc Upload (stream Chunk) returns (FileUploadResponse) {}
-  rpc GetFileURLs (FileUUIDs) returns (FileURLs) {}
+  rpc GetFile (FileUUID) returns(stream Chunk){}
 }
 
-message FileUUIDs {
-    repeated string UUIDs = 1[(validator.field) ={repeated_count_min: 1}];
+message FileUUID {
+  string UUID = 1[(validator.field) = {string_not_empty: true}];
 }
 
 message FileURLs {

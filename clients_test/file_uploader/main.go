@@ -28,6 +28,11 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 
+	f, err := os.Open("clients_test/file_uploader/photo_2020-09-22_23-05-13.jpg")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
 	ch := &file.Chunk{
 		OneOfChunk: &file.Chunk_Meta{
 			Meta: &file.FileMetadata{
@@ -37,11 +42,6 @@ func main() {
 	}
 	err = stream.Send(ch)
 
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	f, err := os.Open("clients_test/file_uploader/foto-prod-11146.jpeg")
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

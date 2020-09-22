@@ -16,9 +16,9 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
-func (this *FileUUIDs) Validate() error {
-	if len(this.UUIDs) < 1 {
-		return github_com_mwitkow_go_proto_validators.FieldError("UUIDs", fmt.Errorf(`value '%v' must contain at least 1 elements`, this.UUIDs))
+func (this *FileUUID) Validate() error {
+	if this.UUID == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("UUID", fmt.Errorf(`value '%v' must not be an empty string`, this.UUID))
 	}
 	return nil
 }

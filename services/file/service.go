@@ -29,9 +29,10 @@ type config struct {
 
 type Dependences struct {
 	Registrar *grpc.Server
+	GrpcConn  *grpc.ClientConn
 }
 
-func NewFile(dep Dependences) (file.FileServer, error) {
+func NewFile(dep Dependences) (file.FileClient, error) {
 	cfg := config{}
 	if err := env.Parse(&cfg); err != nil {
 		return nil, errors.WithStack(err)
@@ -58,5 +59,5 @@ func NewFile(dep Dependences) (file.FileServer, error) {
 
 	file.RegisterFileServer(dep.Registrar, fu)
 
-	return fu, nil
+	return file.NewFileClient(dep.GrpcConn), nil
 }

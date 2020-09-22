@@ -60,19 +60,10 @@ func (fu File) asyncUploadToS3(bucket string, body io.Reader, meta *file.FileMet
 	return resp
 }
 
-var fileTypeToContentType = map[file.FileType]string{
-	file.FileType_JPEG: "image/jpeg",
-}
-
 func (fu File) uploadToS3(bucket string, body io.Reader, meta *file.FileMetadata) (string, error) {
 	partition, err := getPartition(bucket)
 	if err != nil {
 		return "", err
-	}
-
-	contentType := fileTypeToContentType[meta.Type]
-	if contentType == "" {
-		return "", errors.New("unknown file type")
 	}
 
 	UUID, err := uuid.NewUUID()
@@ -82,11 +73,11 @@ func (fu File) uploadToS3(bucket string, body io.Reader, meta *file.FileMetadata
 
 	fileUUID := makeFileUUID(UUID.String(), partition)
 	_, err = fu.s3Uploader.Upload(&s3manager.UploadInput{
-		Body:        body,
-		Bucket:      aws.String(bucket),
-		Key:         aws.String(makeFileUUID(UUID.String(), partition)),
-		Expires:     aws.Time(time.Now().UTC().Add(time.Hour)),
-		ContentType: aws.String(contentType),
+		Body:     body,
+		Bucket:   aws.String(bucket),
+		Key:      aws.String(makeFileUUID(UUID.String(), partition)),
+		Expires:  aws.Time(time.Now().UTC().Add(time.Hour)),
+		Metadata: makeAWSMetadata(meta),
 	})
 
 	return fileUUID, errors.WithStack(err)

@@ -70,3 +70,8 @@ func (s Server) Serve() error {
 	}
 	return nil
 }
+
+func (s Server) GrpcDial() (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial("localhost"+s.cfg.Port, grpc.WithInsecure())
+	return conn, errors.WithStack(err)
+}
