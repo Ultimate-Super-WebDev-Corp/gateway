@@ -1,9 +1,8 @@
 package search
 
 import (
-	"context"
+	"strings"
 
-	vision "cloud.google.com/go/vision/apiv1"
 	"github.com/caarlos0/env/v6"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -13,11 +12,13 @@ import (
 )
 
 type Search struct {
-	fileCli              file.FileClient
-	imageAnnotatorClient *vision.ImageAnnotatorClient
+	fileCli  file.FileClient
+	visionRR *gcVisionRoundRobin
 }
 
-type config struct{}
+type config struct {
+	GCVisionPathToKeys string `env:"GC_VISION_PATH_TO_KEYS"`
+}
 
 type Dependences struct {
 	Registrar *grpc.Server
@@ -30,14 +31,16 @@ func NewSearch(dep Dependences) error {
 		return errors.WithStack(err)
 	}
 
-	imageAnnotatorClient, err := vision.NewImageAnnotatorClient(context.Background())
+	gcVisionPathToKeys := strings.Split(cfg.GCVisionPathToKeys, ";")
+
+	visionRR, err := newGcVisionRoundRobin(gcVisionPathToKeys)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
 	cus := &Search{
-		fileCli:              dep.FileCli,
-		imageAnnotatorClient: imageAnnotatorClient,
+		fileCli:  dep.FileCli,
+		visionRR: visionRR,
 	}
 
 	search.RegisterSearchServer(dep.Registrar, cus)
