@@ -85,7 +85,7 @@ func (s Search) textRecognitionByUUID(ctx context.Context, uuid string) (*recogn
 		return nil, errors.WithStack(err)
 	}
 
-	annotations, err := s.imageAnnotatorClient.DetectTexts(ctx, image, nil, 0)
+	annotations, err := s.visionRR.DetectTexts(ctx, image)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
