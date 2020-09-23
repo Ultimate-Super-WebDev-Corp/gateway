@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "natural-treat-290015",
+  "private_key_id": "e5de18fd004e0b3663f78638af940a878793547a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDCMUqFo5JzEOSP\nAFbw2WrRiwxx2bHwy7SphBPZHkIG7copfiyXBgFkSFrjQFdtpfDiEVWtkI3chauE\nhhHV7YfnZEGz2f1dFsHrFbXyKu7wJKYq/vtB1uNAn8GYA52E8K2nNoj1B0mU476s\nAs7UCc2vp133fqo5ST8JK+1oWwX2dxRMyAZPaEq2uu5RW1LK+otJoXExZNeQ0tk3\nQhCsQzkGZhdngULHZnF9B0dgo7KbpZxsXMbfAf1td3HDatdeI52LI7j6ArBPy/nT\nnWZbPvGE/7cP/4bcGKvAYpZvsiMyW9K1EwOEZZuNRkk2YjRvFPOZ9/5vlLgKSLf+\n7nINq2xrAgMBAAECggEAAPGZYZ3iY9HEspc3VPNRjBQnatQ6g6eRyLMeH5OAkaUN\nMvdsgw1h61lYq7sP0bYZPhgEeRP3RIeXxkyagJYnb23yzct06kNmjNxtpnAj+iHL\ndvEHSpIfR5yfJbx6wv8icOoYb0xqRKF4t0BKPgiQKdbf44iHjkC3YDWI8VVj6Yc3\ndCKXpZLoLd/PUdaVGV2J7VaGce4Ku73FlxXyoBhpWaUsPsUTzsHVz5qAjY7Wb/PY\n6wawv1mq1P2w+SxlK9n5Vy3xiLR8PLuBf7PJpO7SbSr6TwPunqHTDdwiNZn0JGJV\nHnhYQDThDmnVpiJvRcblrN7uqpa3NGxJIg6vDtpP7QKBgQDpn/CXE0iwPopXd56H\nxSjEvpH+azdJ54dUBfSmiVBywrJ2xWUv7yPOvnzWoliO7P5udQxDsf7TmHoRyuUw\ndJhXfp5M+zlAFv4zfXItmzm8RT+KwTek806Ue2mAw5h9x2uxhR0wWeK5xC/VYedh\nXofsTFJr4+bRgPyZdS9UaVMcBQKBgQDUyotAe5PyQYrbdCO5yJ9OE708jlOZ5F4k\nc/wQe1VHoB3QGgN/FaI6tKTWxgRpYHVzMRk8AnsuIB+QTjqf4cqd8Ck4CGqj48+Z\nKIaSmELPLb4uuX0GBvnD7mrDGOEvy8/59h480f4MjUtzc/XgKCAoCtj70oF1F/lJ\nQ5BnjyZBrwKBgQDHCSYV763ryTxfTF/ZV9Vl2N3UnU9bPU+D/Bb0kuPhAZK9sWqF\nrf0ZtBvzWBiOm8YgIMQ0ID7z0mGdKvibkZoAYLVI7HdX7L7g6y0NQcOsbGq4MejQ\nNSFrSsEVnI4cCnvrn3bArLOGhGgkKObRg5HVdSh7FoydTIDn1HhgN+NAaQKBgH6d\nloZkAgBgZ5N1Y9ykN8ZpkGx789raO/pM2WulN3VLHPI6yGHSKZns6ziw0ucw8jH8\nwRsoDsu/aYigQ9nmrH2V7bDdsTab02c66fhIiVhly4hZ7r6rX+rp7rTwFO4vxCzj\n+dIO0a/+Uyr7kQ40Ug4BhmMxOr7F6RtjDIXSc90ZAoGAPwECqzFobEKfUOchxsFr\n6DymAH55Um60EZNJXBoX/OnE6lUW9pG/eXHJ2RaJJYuWSY9uDte15gxc+m0Ne3bK\n22rgDxFkxTHYMnXCy5jM3pQSmjljO+YD9j5in3Jtfw0prvjJirJxuAx2owRotN15\no41VGJcKdt1Z1smAuB9ynnQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "lexeykozz@natural-treat-290015.iam.gserviceaccount.com",
+  "client_id": "117472262327842543434",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/lexeykozz%40natural-treat-290015.iam.gserviceaccount.com"
+}
