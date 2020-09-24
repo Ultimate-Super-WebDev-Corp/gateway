@@ -1,4 +1,4 @@
-package search
+package product
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	vision "cloud.google.com/go/vision/apiv1"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/pkg/errors"
 
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
@@ -25,7 +26,7 @@ func (f textRecognitionByUUIDFuture) get() (*recognizedText, error) {
 		return nil, err
 	}
 }
-func (s Search) newTextRecognitionByUUIDFuture(ctx context.Context, uuid string) textRecognitionByUUIDFuture {
+func (p Product) newTextRecognitionByUUIDFuture(ctx context.Context, uuid string) textRecognitionByUUIDFuture {
 	f := textRecognitionByUUIDFuture{
 		err:  make(chan error, 1),
 		resp: make(chan *recognizedText, 1),
@@ -37,7 +38,7 @@ func (s Search) newTextRecognitionByUUIDFuture(ctx context.Context, uuid string)
 				future.err <- errors.Errorf("recovering from panic %v", p)
 			}
 		}()
-		r, err := s.textRecognitionByUUID(ctx, uuid)
+		r, err := p.textRecognitionByUUID(ctx, uuid)
 		if err != nil {
 			future.err <- err
 		} else {
@@ -49,19 +50,19 @@ func (s Search) newTextRecognitionByUUIDFuture(ctx context.Context, uuid string)
 }
 
 type recognizedText struct {
-	text  string
-	words []string
+	text string
 }
 
-func (s Search) textRecognitionByUUID(ctx context.Context, uuid string) (*recognizedText, error) {
+func (p Product) textRecognitionByUUID(ctx context.Context, uuid string) (*recognizedText, error) {
 	buff := bytes.NewBuffer([]byte{})
-	streamGetFile, err := s.fileCli.GetFile(ctx, &file.FileUUID{
+	streamGetFile, err := p.fileCli.GetFile(ctx, &file.FileUUID{
 		UUID: uuid,
 	})
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
+	var meta *file.Chunk_Meta
 	for {
 		msg, err := streamGetFile.Recv()
 		if err == io.EOF {
@@ -72,34 +73,41 @@ func (s Search) textRecognitionByUUID(ctx context.Context, uuid string) (*recogn
 		}
 		switch ch := msg.OneOfChunk.(type) {
 		case *file.Chunk_Meta:
-			continue
+			meta = ch
 		case *file.Chunk_Chunk:
 			_, _ = buff.Write(ch.Chunk)
 		default:
 			return nil, errors.WithStack(err)
 		}
 	}
-
+	if meta != nil && meta.Meta != nil && len(meta.Meta.RecognizedText) > 0 {
+		return &recognizedText{
+			text: meta.Meta.RecognizedText,
+		}, nil
+	}
 	image, err := vision.NewImageFromReader(buff)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	annotations, err := s.visionRR.DetectTexts(ctx, image)
+	annotations, err := p.visionRR.DetectTexts(ctx, image)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	resp := recognizedText{
-		words: make([]string, 0, len(annotations)),
-	}
-
-	for i, a := range annotations {
-		if i == 0 {
-			resp.text = strings.Replace(a.Description, "\n", " ", -1)
-		} else {
-			resp.words = append(resp.words, a.Description)
+	resp := recognizedText{}
+	if len(annotations) > 0 && len(annotations[0].Description) > 0 {
+		resp.text = strings.Replace(annotations[0].Description, "\n", " ", -1)
+		_, err := p.fileCli.UpdateMetadata(ctx, &file.UpdateFileMetadata{
+			UUID: uuid,
+			Meta: &file.FileMetadata{
+				RecognizedText: resp.text,
+			},
+		})
+		if err != nil {
+			ctxzap.Extract(ctx).Error(err.Error())
 		}
 	}
+
 	return &resp, nil
 }

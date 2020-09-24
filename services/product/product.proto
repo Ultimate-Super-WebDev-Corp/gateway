@@ -1,0 +1,21 @@
+syntax = "proto3";
+package search;
+
+option go_package = "gen/services/product";
+
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+service Product {
+  rpc SearchByIds (SearchByIdsRequest) returns (ProductMsg) {}
+}
+
+message SearchByIdsRequest {
+  repeated string UUIDs = 1[(validator.field) = {repeated_count_min: 1}];
+}
+
+message ProductMsg {
+  uint64 Id = 1;
+  string Name = 2;
+  string Brand = 3;
+  string Description = 4;
+}

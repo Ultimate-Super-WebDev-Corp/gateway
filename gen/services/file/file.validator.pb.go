@@ -8,6 +8,7 @@ import (
 	math "math"
 	proto "github.com/golang/protobuf/proto"
 	_ "github.com/mwitkow/go-proto-validators"
+	_ "github.com/golang/protobuf/ptypes/empty"
 	github_com_mwitkow_go_proto_validators "github.com/mwitkow/go-proto-validators"
 )
 
@@ -39,5 +40,16 @@ func (this *FileUploadResponse) Validate() error {
 	return nil
 }
 func (this *FileMetadata) Validate() error {
+	return nil
+}
+func (this *UpdateFileMetadata) Validate() error {
+	if this.UUID == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("UUID", fmt.Errorf(`value '%v' must not be an empty string`, this.UUID))
+	}
+	if this.Meta != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Meta); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Meta", err)
+		}
+	}
 	return nil
 }

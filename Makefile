@@ -1,5 +1,5 @@
 generate:
-	rm -rf /gen
+	rm -rf ./gen
 	find ./services -type f -iname "*.proto" -exec \
 	protoc --proto_path=${GOPATH}/src --proto_path=./ --go_out=plugins=grpc:./ --govalidators_out=. {} \;
 

@@ -43,7 +43,8 @@ func isBucketExists(err error) bool {
 
 func makeAWSMetadata(meta *file.FileMetadata) map[string]*string {
 	return map[string]*string{
-		"Type": aws.String(strconv.Itoa(int(meta.Type))),
+		"Type":            aws.String(strconv.Itoa(int(meta.Type))),
+		"Recognized_text": aws.String(meta.RecognizedText),
 	}
 }
 
@@ -57,7 +58,25 @@ func extractMetadataFromAWS(meta map[string]*string) (*file.FileMetadata, error)
 		return nil, errors.WithStack(err)
 	}
 
+	recognizedText := ""
+	txt := meta["Recognized_text"]
+	if txt != nil {
+		recognizedText = *txt
+	}
+
 	return &file.FileMetadata{
-		Type: file.FileType(fileType),
+		Type:           file.FileType(fileType),
+		RecognizedText: recognizedText,
 	}, nil
+}
+
+func updateAWSMetadata(awsMeta map[string]*string, meta *file.FileMetadata) map[string]*string {
+	if meta.Type != file.FileType_UNDEFINED {
+		awsMeta["Type"] = aws.String(strconv.Itoa(int(meta.Type)))
+	}
+	if len(meta.RecognizedText) > 0 {
+		awsMeta["Recognized_text"] = aws.String(meta.RecognizedText)
+	}
+
+	return awsMeta
 }

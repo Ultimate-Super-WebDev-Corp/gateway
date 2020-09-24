@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/file"
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/search"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/product"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 		panic(err)
 	}
 
-	err = search.NewSearch(search.Dependences{
+	err = product.NewProduct(product.Dependences{
 		Registrar: srv.RpcServer,
 		FileCli:   fileCli,
 	})

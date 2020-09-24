@@ -11,6 +11,7 @@ require (
 	github.com/googleapis/gax-go v1.0.3 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
 	github.com/mwitkow/go-proto-validators v0.3.2
+	github.com/olivere/elastic/v7 v7.0.20
 	github.com/pkg/errors v0.9.1
 	go.uber.org/zap v1.16.0
 	google.golang.org/api v0.32.0

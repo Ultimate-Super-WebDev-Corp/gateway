@@ -66,6 +66,7 @@ services:
       S3_REGION: us-east-1
       S3_BUCKET_NAME: test
       GC_VISION_PATH_TO_KEYS: /.gcloaud/SimpleImageParser-e5de18fd004e.json;/.gcloaud/test-items-search-b761860705d4.json
+      ELASTIC_URLS: http://elasticsearch:9200
     depends_on:
       - s3
       - elasticsearch
