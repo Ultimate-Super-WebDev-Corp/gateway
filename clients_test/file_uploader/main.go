@@ -28,7 +28,7 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 
-	f, err := os.Open("clients_test/file_uploader/photo_2020-09-22_23-05-13.jpg")
+	f, err := os.Open("clients_test/file_uploader/photo_2020-09-21_22-44-27.jpg")
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

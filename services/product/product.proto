@@ -4,18 +4,24 @@ package search;
 option go_package = "gen/services/product";
 
 import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "google/protobuf/empty.proto";
 
 service Product {
-  rpc SearchByIds (SearchByIdsRequest) returns (ProductMsg) {}
+  rpc SearchByUUIDs (SearchByUUIDsRequest) returns (ProductWithID) {}
+  rpc Insert (ProductMsg) returns(google.protobuf.Empty) {}
 }
 
-message SearchByIdsRequest {
+message SearchByUUIDsRequest {
   repeated string UUIDs = 1[(validator.field) = {repeated_count_min: 1}];
 }
 
 message ProductMsg {
+  string Name = 1[(validator.field) = {string_not_empty: true}];
+  string Brand = 2[(validator.field) = {string_not_empty: true}];
+  string Description = 3[(validator.field) = {string_not_empty: true}];
+}
+
+message ProductWithID {
   uint64 Id = 1;
-  string Name = 2;
-  string Brand = 3;
-  string Description = 4;
+  ProductMsg Product = 2;
 }

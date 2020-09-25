@@ -9,6 +9,7 @@ package product
 import (
 	context "context"
 	proto "github.com/golang/protobuf/proto"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	_ "github.com/mwitkow/go-proto-validators"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -30,7 +31,7 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type SearchByIdsRequest struct {
+type SearchByUUIDsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -38,8 +39,8 @@ type SearchByIdsRequest struct {
 	UUIDs []string `protobuf:"bytes,1,rep,name=UUIDs,proto3" json:"UUIDs,omitempty"`
 }
 
-func (x *SearchByIdsRequest) Reset() {
-	*x = SearchByIdsRequest{}
+func (x *SearchByUUIDsRequest) Reset() {
+	*x = SearchByUUIDsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_services_product_product_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -47,13 +48,13 @@ func (x *SearchByIdsRequest) Reset() {
 	}
 }
 
-func (x *SearchByIdsRequest) String() string {
+func (x *SearchByUUIDsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SearchByIdsRequest) ProtoMessage() {}
+func (*SearchByUUIDsRequest) ProtoMessage() {}
 
-func (x *SearchByIdsRequest) ProtoReflect() protoreflect.Message {
+func (x *SearchByUUIDsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_services_product_product_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -65,12 +66,12 @@ func (x *SearchByIdsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SearchByIdsRequest.ProtoReflect.Descriptor instead.
-func (*SearchByIdsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use SearchByUUIDsRequest.ProtoReflect.Descriptor instead.
+func (*SearchByUUIDsRequest) Descriptor() ([]byte, []int) {
 	return file_services_product_product_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *SearchByIdsRequest) GetUUIDs() []string {
+func (x *SearchByUUIDsRequest) GetUUIDs() []string {
 	if x != nil {
 		return x.UUIDs
 	}
@@ -82,10 +83,9 @@ type ProductMsg struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          uint64 `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"`
-	Name        string `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
-	Brand       string `protobuf:"bytes,3,opt,name=Brand,proto3" json:"Brand,omitempty"`
-	Description string `protobuf:"bytes,4,opt,name=Description,proto3" json:"Description,omitempty"`
+	Name        string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	Brand       string `protobuf:"bytes,2,opt,name=Brand,proto3" json:"Brand,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=Description,proto3" json:"Description,omitempty"`
 }
 
 func (x *ProductMsg) Reset() {
@@ -120,13 +120,6 @@ func (*ProductMsg) Descriptor() ([]byte, []int) {
 	return file_services_product_product_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ProductMsg) GetId() uint64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
 func (x *ProductMsg) GetName() string {
 	if x != nil {
 		return x.Name
@@ -148,6 +141,61 @@ func (x *ProductMsg) GetDescription() string {
 	return ""
 }
 
+type ProductWithID struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id      uint64      `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"`
+	Product *ProductMsg `protobuf:"bytes,2,opt,name=Product,proto3" json:"Product,omitempty"`
+}
+
+func (x *ProductWithID) Reset() {
+	*x = ProductWithID{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_services_product_product_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProductWithID) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProductWithID) ProtoMessage() {}
+
+func (x *ProductWithID) ProtoReflect() protoreflect.Message {
+	mi := &file_services_product_product_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProductWithID.ProtoReflect.Descriptor instead.
+func (*ProductWithID) Descriptor() ([]byte, []int) {
+	return file_services_product_product_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ProductWithID) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ProductWithID) GetProduct() *ProductMsg {
+	if x != nil {
+		return x.Product
+	}
+	return nil
+}
+
 var File_services_product_product_proto protoreflect.FileDescriptor
 
 var file_services_product_product_proto_rawDesc = []byte{
@@ -157,23 +205,34 @@ var file_services_product_product_proto_rawDesc = []byte{
 	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6d, 0x77, 0x69, 0x74, 0x6b, 0x6f, 0x77, 0x2f, 0x67, 0x6f, 0x2d,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2d, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x73,
 	0x2f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x22, 0x32, 0x0a, 0x12, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x42, 0x79, 0x49, 0x64, 0x73, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x05, 0x55, 0x55, 0x49, 0x44, 0x73, 0x18,
-	0x01, 0x20, 0x03, 0x28, 0x09, 0x42, 0x06, 0xe2, 0xdf, 0x1f, 0x02, 0x60, 0x01, 0x52, 0x05, 0x55,
-	0x55, 0x49, 0x44, 0x73, 0x22, 0x68, 0x0a, 0x0a, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x4d,
-	0x73, 0x67, 0x12, 0x0e, 0x0a, 0x02, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02,
-	0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x42, 0x72, 0x61, 0x6e, 0x64, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x42, 0x72, 0x61, 0x6e, 0x64, 0x12, 0x20, 0x0a, 0x0b,
-	0x44, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x0b, 0x44, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x32, 0x4a,
-	0x0a, 0x07, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x12, 0x3f, 0x0a, 0x0b, 0x53, 0x65, 0x61,
-	0x72, 0x63, 0x68, 0x42, 0x79, 0x49, 0x64, 0x73, 0x12, 0x1a, 0x2e, 0x73, 0x65, 0x61, 0x72, 0x63,
-	0x68, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x42, 0x79, 0x49, 0x64, 0x73, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x12, 0x2e, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x2e, 0x50, 0x72,
-	0x6f, 0x64, 0x75, 0x63, 0x74, 0x4d, 0x73, 0x67, 0x22, 0x00, 0x42, 0x16, 0x5a, 0x14, 0x67, 0x65,
-	0x6e, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2f, 0x70, 0x72, 0x6f, 0x64, 0x75,
-	0x63, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x34, 0x0a,
+	0x14, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x42, 0x79, 0x55, 0x55, 0x49, 0x44, 0x73, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x05, 0x55, 0x55, 0x49, 0x44, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x09, 0x42, 0x06, 0xe2, 0xdf, 0x1f, 0x02, 0x60, 0x01, 0x52, 0x05, 0x55, 0x55,
+	0x49, 0x44, 0x73, 0x22, 0x70, 0x0a, 0x0a, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x4d, 0x73,
+	0x67, 0x12, 0x1a, 0x0a, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42,
+	0x06, 0xe2, 0xdf, 0x1f, 0x02, 0x58, 0x01, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x1c, 0x0a,
+	0x05, 0x42, 0x72, 0x61, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x06, 0xe2, 0xdf,
+	0x1f, 0x02, 0x58, 0x01, 0x52, 0x05, 0x42, 0x72, 0x61, 0x6e, 0x64, 0x12, 0x28, 0x0a, 0x0b, 0x44,
+	0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
+	0x42, 0x06, 0xe2, 0xdf, 0x1f, 0x02, 0x58, 0x01, 0x52, 0x0b, 0x44, 0x65, 0x73, 0x63, 0x72, 0x69,
+	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x4d, 0x0a, 0x0d, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74,
+	0x57, 0x69, 0x74, 0x68, 0x49, 0x44, 0x12, 0x0e, 0x0a, 0x02, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x02, 0x49, 0x64, 0x12, 0x2c, 0x0a, 0x07, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63,
+	0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68,
+	0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x4d, 0x73, 0x67, 0x52, 0x07, 0x50, 0x72, 0x6f,
+	0x64, 0x75, 0x63, 0x74, 0x32, 0x89, 0x01, 0x0a, 0x07, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74,
+	0x12, 0x46, 0x0a, 0x0d, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x42, 0x79, 0x55, 0x55, 0x49, 0x44,
+	0x73, 0x12, 0x1c, 0x2e, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63,
+	0x68, 0x42, 0x79, 0x55, 0x55, 0x49, 0x44, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x15, 0x2e, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74,
+	0x57, 0x69, 0x74, 0x68, 0x49, 0x44, 0x22, 0x00, 0x12, 0x36, 0x0a, 0x06, 0x49, 0x6e, 0x73, 0x65,
+	0x72, 0x74, 0x12, 0x12, 0x2e, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x2e, 0x50, 0x72, 0x6f, 0x64,
+	0x75, 0x63, 0x74, 0x4d, 0x73, 0x67, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00,
+	0x42, 0x16, 0x5a, 0x14, 0x67, 0x65, 0x6e, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x73,
+	0x2f, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -188,19 +247,24 @@ func file_services_product_product_proto_rawDescGZIP() []byte {
 	return file_services_product_product_proto_rawDescData
 }
 
-var file_services_product_product_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_services_product_product_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_services_product_product_proto_goTypes = []interface{}{
-	(*SearchByIdsRequest)(nil), // 0: search.SearchByIdsRequest
-	(*ProductMsg)(nil),         // 1: search.ProductMsg
+	(*SearchByUUIDsRequest)(nil), // 0: search.SearchByUUIDsRequest
+	(*ProductMsg)(nil),           // 1: search.ProductMsg
+	(*ProductWithID)(nil),        // 2: search.ProductWithID
+	(*empty.Empty)(nil),          // 3: google.protobuf.Empty
 }
 var file_services_product_product_proto_depIdxs = []int32{
-	0, // 0: search.Product.SearchByIds:input_type -> search.SearchByIdsRequest
-	1, // 1: search.Product.SearchByIds:output_type -> search.ProductMsg
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: search.ProductWithID.Product:type_name -> search.ProductMsg
+	0, // 1: search.Product.SearchByUUIDs:input_type -> search.SearchByUUIDsRequest
+	1, // 2: search.Product.Insert:input_type -> search.ProductMsg
+	2, // 3: search.Product.SearchByUUIDs:output_type -> search.ProductWithID
+	3, // 4: search.Product.Insert:output_type -> google.protobuf.Empty
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_services_product_product_proto_init() }
@@ -210,7 +274,7 @@ func file_services_product_product_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_services_product_product_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchByIdsRequest); i {
+			switch v := v.(*SearchByUUIDsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -233,6 +297,18 @@ func file_services_product_product_proto_init() {
 				return nil
 			}
 		}
+		file_services_product_product_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProductWithID); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -240,7 +316,7 @@ func file_services_product_product_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_services_product_product_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -266,7 +342,8 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ProductClient interface {
-	SearchByIds(ctx context.Context, in *SearchByIdsRequest, opts ...grpc.CallOption) (*ProductMsg, error)
+	SearchByUUIDs(ctx context.Context, in *SearchByUUIDsRequest, opts ...grpc.CallOption) (*ProductWithID, error)
+	Insert(ctx context.Context, in *ProductMsg, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type productClient struct {
@@ -277,9 +354,18 @@ func NewProductClient(cc grpc.ClientConnInterface) ProductClient {
 	return &productClient{cc}
 }
 
-func (c *productClient) SearchByIds(ctx context.Context, in *SearchByIdsRequest, opts ...grpc.CallOption) (*ProductMsg, error) {
-	out := new(ProductMsg)
-	err := c.cc.Invoke(ctx, "/search.Product/SearchByIds", in, out, opts...)
+func (c *productClient) SearchByUUIDs(ctx context.Context, in *SearchByUUIDsRequest, opts ...grpc.CallOption) (*ProductWithID, error) {
+	out := new(ProductWithID)
+	err := c.cc.Invoke(ctx, "/search.Product/SearchByUUIDs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *productClient) Insert(ctx context.Context, in *ProductMsg, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/search.Product/Insert", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -288,35 +374,57 @@ func (c *productClient) SearchByIds(ctx context.Context, in *SearchByIdsRequest,
 
 // ProductServer is the server API for Product service.
 type ProductServer interface {
-	SearchByIds(context.Context, *SearchByIdsRequest) (*ProductMsg, error)
+	SearchByUUIDs(context.Context, *SearchByUUIDsRequest) (*ProductWithID, error)
+	Insert(context.Context, *ProductMsg) (*empty.Empty, error)
 }
 
 // UnimplementedProductServer can be embedded to have forward compatible implementations.
 type UnimplementedProductServer struct {
 }
 
-func (*UnimplementedProductServer) SearchByIds(context.Context, *SearchByIdsRequest) (*ProductMsg, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchByIds not implemented")
+func (*UnimplementedProductServer) SearchByUUIDs(context.Context, *SearchByUUIDsRequest) (*ProductWithID, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchByUUIDs not implemented")
+}
+func (*UnimplementedProductServer) Insert(context.Context, *ProductMsg) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Insert not implemented")
 }
 
 func RegisterProductServer(s *grpc.Server, srv ProductServer) {
 	s.RegisterService(&_Product_serviceDesc, srv)
 }
 
-func _Product_SearchByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchByIdsRequest)
+func _Product_SearchByUUIDs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchByUUIDsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductServer).SearchByIds(ctx, in)
+		return srv.(ProductServer).SearchByUUIDs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/search.Product/SearchByIds",
+		FullMethod: "/search.Product/SearchByUUIDs",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductServer).SearchByIds(ctx, req.(*SearchByIdsRequest))
+		return srv.(ProductServer).SearchByUUIDs(ctx, req.(*SearchByUUIDsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Product_Insert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProductMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductServer).Insert(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/search.Product/Insert",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductServer).Insert(ctx, req.(*ProductMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -326,8 +434,12 @@ var _Product_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ProductServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SearchByIds",
-			Handler:    _Product_SearchByIds_Handler,
+			MethodName: "SearchByUUIDs",
+			Handler:    _Product_SearchByUUIDs_Handler,
+		},
+		{
+			MethodName: "Insert",
+			Handler:    _Product_Insert_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

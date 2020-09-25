@@ -20,12 +20,13 @@ const (
 	fieldBrand       = "brand"
 	fieldName        = "name"
 	fieldDescription = "description"
+	fieldUpdatedAt   = "updated_at"
 
 	eProductSize      = 1
 	eProductFuzziness = "2"
 )
 
-func (p Product) SearchByIds(ctx context.Context, msg *product.SearchByIdsRequest) (*product.ProductMsg, error) {
+func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRequest) (*product.ProductWithID, error) {
 	logger := ctxzap.Extract(ctx)
 	textRecognitionFutures := map[string]textRecognitionByUUIDFuture{}
 
@@ -88,8 +89,12 @@ func (p Product) SearchByIds(ctx context.Context, msg *product.SearchByIdsReques
 		}).
 		QueryRow()
 
-	resProduct := product.ProductMsg{}
-	if err := row.Scan(&resProduct.Id, &resProduct.Name, &resProduct.Brand, &resProduct.Description); err != nil {
+	resProduct := product.ProductWithID{
+		Product: &product.ProductMsg{},
+	}
+	if err := row.Scan(
+		&resProduct.Id, &resProduct.Product.Name, &resProduct.Product.Brand, &resProduct.Product.Description,
+	); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

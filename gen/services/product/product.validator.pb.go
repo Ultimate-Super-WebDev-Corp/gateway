@@ -7,6 +7,7 @@ import (
 	fmt "fmt"
 	math "math"
 	proto "github.com/golang/protobuf/proto"
+	_ "github.com/golang/protobuf/ptypes/empty"
 	_ "github.com/mwitkow/go-proto-validators"
 	github_com_mwitkow_go_proto_validators "github.com/mwitkow/go-proto-validators"
 )
@@ -16,12 +17,29 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
-func (this *SearchByIdsRequest) Validate() error {
+func (this *SearchByUUIDsRequest) Validate() error {
 	if len(this.UUIDs) < 1 {
 		return github_com_mwitkow_go_proto_validators.FieldError("UUIDs", fmt.Errorf(`value '%v' must contain at least 1 elements`, this.UUIDs))
 	}
 	return nil
 }
 func (this *ProductMsg) Validate() error {
+	if this.Name == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Name", fmt.Errorf(`value '%v' must not be an empty string`, this.Name))
+	}
+	if this.Brand == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Brand", fmt.Errorf(`value '%v' must not be an empty string`, this.Brand))
+	}
+	if this.Description == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Description", fmt.Errorf(`value '%v' must not be an empty string`, this.Description))
+	}
+	return nil
+}
+func (this *ProductWithID) Validate() error {
+	if this.Product != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Product); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Product", err)
+		}
+	}
 	return nil
 }
