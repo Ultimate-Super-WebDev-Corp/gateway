@@ -25,8 +25,8 @@ curl:
 create_pg_migrate:
 	migrate create -ext sql -dir migrations/pg -seq $(migrate_name)
 
-up_pg_migrate: #todo move to docker-compose
+up_pg_migrate:
 	migrate -database postgresql://gateway:gateway@localhost:5432/gateway?sslmode=disable -path ./migrations/pg up
 
-down_pg_migrate: #todo move to docker-compose
+down_pg_migrate:
 	migrate -database postgresql://gateway:gateway@localhost:5432/gateway?sslmode=disable -path ./migrations/pg down

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/olivere/elastic/v7"
 	"go.uber.org/zap"
@@ -14,7 +15,14 @@ import (
 )
 
 const (
-	elasticIndexName = "product"
+	objectProduct    = "product"
+	fieldId          = "id"
+	fieldBrand       = "brand"
+	fieldName        = "name"
+	fieldDescription = "description"
+
+	eProductSize      = 1
+	eProductFuzziness = "2"
 )
 
 func (p Product) SearchByIds(ctx context.Context, msg *product.SearchByIdsRequest) (*product.ProductMsg, error) {
@@ -49,13 +57,16 @@ func (p Product) SearchByIds(ctx context.Context, msg *product.SearchByIdsReques
 	}
 
 	elasticQuery := elastic.NewBoolQuery().Should(
-		elastic.NewMatchQuery("brand", text).Fuzziness("2"),
-		elastic.NewMatchQuery("name", text).Fuzziness("2"),
+		elastic.NewMatchQuery(fieldBrand, text).Fuzziness(eProductFuzziness),
+		elastic.NewMatchQuery(fieldName, text).Fuzziness(eProductFuzziness),
 	).MinimumNumberShouldMatch(1)
 
-	searchRes, err := p.elasticCli.Search(elasticIndexName).
+	searchRes, err := p.elasticCli.Search(objectProduct).
+		FetchSourceContext(
+			elastic.NewFetchSourceContext(true).
+				Include(fieldId)).
 		Query(elasticQuery).
-		Size(1).Do(ctx)
+		Size(eProductSize).Do(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -64,10 +75,27 @@ func (p Product) SearchByIds(ctx context.Context, msg *product.SearchByIdsReques
 		return nil, status.Error(codes.NotFound, "product not found")
 	}
 
+	eRespProduct := eProduct{}
+	if err := json.Unmarshal(searchRes.Hits.Hits[0].Source, &eRespProduct); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	row := p.gatewayDB.
+		Select(fieldId, fieldName, fieldBrand, fieldDescription).
+		From(objectProduct).
+		Where(squirrel.Eq{
+			fieldId: eRespProduct.Id,
+		}).
+		QueryRow()
+
 	resProduct := product.ProductMsg{}
-	if err := json.Unmarshal(searchRes.Hits.Hits[0].Source, &resProduct); err != nil {
+	if err := row.Scan(&resProduct.Id, &resProduct.Name, &resProduct.Brand, &resProduct.Description); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &resProduct, nil
+}
+
+type eProduct struct {
+	Id uint64 `json:"id"`
 }

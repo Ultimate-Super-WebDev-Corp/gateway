@@ -55,6 +55,15 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
 
+  pg_migrate:
+    image: migrate/migrate
+    volumes:
+    - ./migrations/pg:/migrations/pg
+    restart: on-failure
+    depends_on:
+      - postgres
+    command: ["-database", "postgresql://gateway:gateway@postgres:5432/gateway?sslmode=disable", "-path", "/migrations/pg", "up"]
+
   gateway:
     build: .
     volumes:
@@ -67,6 +76,8 @@ services:
       S3_BUCKET_NAME: test
       GC_VISION_PATH_TO_KEYS: /.gcloaud/SimpleImageParser-e5de18fd004e.json;/.gcloaud/test-items-search-b761860705d4.json
       ELASTIC_URLS: http://elasticsearch:9200
+      GATEWAY_DB: postgresql://gateway:gateway@postgres:5432/gateway?sslmode=disable
+    restart: on-failure
     depends_on:
       - s3
       - elasticsearch
