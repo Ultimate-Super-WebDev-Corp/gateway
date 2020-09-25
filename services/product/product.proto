@@ -1,5 +1,5 @@
 syntax = "proto3";
-package search;
+package product;
 
 option go_package = "gen/services/product";
 
