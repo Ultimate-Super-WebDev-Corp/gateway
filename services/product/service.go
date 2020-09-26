@@ -39,8 +39,7 @@ func NewProduct(dep Dependences) error {
 		return errors.WithStack(err)
 	}
 
-	gcVisionPathToKeys := strings.Split(cfg.GCVisionPathToKeys, ";")
-	visionRR, err := newGcVisionRoundRobin(gcVisionPathToKeys)
+	visionRR, err := newGcVisionRoundRobin(cfg.GCVisionPathToKeys)
 	if err != nil {
 		return errors.WithStack(err)
 	}

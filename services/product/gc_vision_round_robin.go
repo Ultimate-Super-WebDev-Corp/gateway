@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"io/ioutil"
 
 	vision "cloud.google.com/go/vision/apiv1"
 	"github.com/pkg/errors"
@@ -14,16 +15,22 @@ type gcVisionRoundRobin struct {
 	current int
 }
 
-func newGcVisionRoundRobin(gcVisionPathToKeys []string) (*gcVisionRoundRobin, error) {
-	if len(gcVisionPathToKeys) == 0 {
-		return nil, errors.New("must be at least one key")
+func newGcVisionRoundRobin(gcVisionPathToKeys string) (*gcVisionRoundRobin, error) {
+	files, err := ioutil.ReadDir(gcVisionPathToKeys)
+	if err != nil {
+		return nil, errors.WithStack(err)
 	}
+
+	if len(files) == 0 {
+		return nil, errors.New("must be at least one key in dir")
+	}
+
 	rb := &gcVisionRoundRobin{
 		clietns: make([]*vision.ImageAnnotatorClient, 0, len(gcVisionPathToKeys)),
 	}
 
-	for _, key := range gcVisionPathToKeys {
-		cli, err := vision.NewImageAnnotatorClient(context.Background(), option.WithCredentialsFile(key))
+	for _, f := range files {
+		cli, err := vision.NewImageAnnotatorClient(context.Background(), option.WithCredentialsFile(gcVisionPathToKeys+"/"+f.Name()))
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}

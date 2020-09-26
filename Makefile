@@ -30,3 +30,9 @@ up_pg_migrate:
 
 down_pg_migrate:
 	migrate -database postgresql://gateway:gateway@localhost:5432/gateway?sslmode=disable -path ./migrations/pg down
+
+build:
+	docker build -t ultimatesuperwebdevcorp/customer:$(tag) .
+
+push:
+	docker push ultimatesuperwebdevcorp/customer:$(tag)

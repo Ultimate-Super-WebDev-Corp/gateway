@@ -10,6 +10,7 @@ RUN go build -o /go/bin/gateway
 
 FROM alpine
 
+COPY ./.gcloaud /.gcloaud
 COPY --from=builder /go/bin/gateway /go/bin/gateway
 RUN chmod +x /go/bin/gateway
 EXPOSE 8080
