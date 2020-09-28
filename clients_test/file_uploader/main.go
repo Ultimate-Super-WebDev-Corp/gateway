@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
 )
@@ -23,7 +24,13 @@ func main() {
 	defer conn.Close()
 
 	c := file.NewFileClient(conn)
-	stream, err := c.Upload(context.Background())
+
+	ctx := metadata.NewOutgoingContext(context.Background(), metadata.MD{
+		"token": []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IiJ9.IJ9LcRwoX0nDaPKNgI-SvbmqIrLjjc0_rfp40Of65_k"},
+	})
+
+	header := metadata.MD{}
+	stream, err := c.Upload(ctx, grpc.Header(&header))
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -72,5 +79,7 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+
 	log.Println(reply.UUID)
+
 }

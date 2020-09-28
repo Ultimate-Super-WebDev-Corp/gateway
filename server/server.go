@@ -2,6 +2,7 @@ package server
 
 import (
 	"net"
+	"runtime/debug"
 
 	"github.com/caarlos0/env/v6"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -11,11 +12,14 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type config struct {
-	IsDev bool   `env:"IS_DEV"`
-	Port  string `env:"PORT" envDefault:":8080"`
+	IsDev     bool   `env:"IS_DEV"`
+	Port      string `env:"PORT" envDefault:":8080"`
+	SecretKey string `env:"TOKEN" envDefault:"TEST"`
 }
 
 type Server struct {
@@ -34,24 +38,27 @@ func NewServer() (*Server, error) {
 	logger := initZapLog(cfg)
 	logger.Sugar().Infof("starting http server on %s", cfg.Port)
 
-	s := grpc.NewServer(
+	srv := &Server{
+		Logger: logger,
+		cfg:    cfg,
+	}
+
+	srv.RpcServer = grpc.NewServer(
 		grpc.StreamInterceptor(middleware.ChainStreamServer(
+			srv.StreamSessionServerInterceptor,
 			grpcZap.StreamServerInterceptor(logger),
 			grpcValidator.StreamServerInterceptor(),
-			grpcRecovery.StreamServerInterceptor(),
+			grpcRecovery.StreamServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
 		)),
 		grpc.UnaryInterceptor(middleware.ChainUnaryServer(
+			srv.UnarySessionServerInterceptor,
 			grpcZap.UnaryServerInterceptor(logger),
 			grpcValidator.UnaryServerInterceptor(),
-			grpcRecovery.UnaryServerInterceptor(),
+			grpcRecovery.UnaryServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
 		)),
 	)
 
-	return &Server{
-		RpcServer: s,
-		Logger:    logger,
-		cfg:       cfg,
-	}, nil
+	return srv, nil
 }
 
 func (s Server) Serve() error {
@@ -72,6 +79,21 @@ func (s Server) Serve() error {
 }
 
 func (s Server) GrpcDial() (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial("localhost"+s.cfg.Port, grpc.WithInsecure())
+	conn, err := grpc.Dial(
+		"localhost"+s.cfg.Port, grpc.WithInsecure(),
+		grpc.WithStreamInterceptor(
+			middleware.ChainStreamClient(
+				s.StreamSessionClientInterceptor,
+			)),
+		grpc.WithUnaryInterceptor(
+			middleware.ChainUnaryClient(
+				s.UnarySessionClientInterceptor,
+			)),
+	)
 	return conn, errors.WithStack(err)
+}
+
+func (s Server) recover(p interface{}) (err error) {
+	s.Logger.Sugar().Errorf("panic triggered: %v stacktrace from panic: %s", p, string(debug.Stack()))
+	return status.Errorf(codes.Internal, "panic triggered: %v", p)
 }

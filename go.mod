@@ -7,6 +7,7 @@ require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/aws/aws-sdk-go v1.34.26
 	github.com/caarlos0/env/v6 v6.3.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/protobuf v1.4.2
 	github.com/google/uuid v1.1.2
 	github.com/googleapis/gax-go v1.0.3 // indirect

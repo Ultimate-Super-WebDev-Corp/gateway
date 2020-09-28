@@ -77,7 +77,7 @@ func (p Product) textRecognitionByUUID(ctx context.Context, uuid string) (*recog
 		case *file.Chunk_Chunk:
 			_, _ = buff.Write(ch.Chunk)
 		default:
-			return nil, errors.WithStack(err)
+			return nil, errors.New("unknown type of chunk")
 		}
 	}
 	if meta != nil && meta.Meta != nil && len(meta.Meta.RecognizedText) > 0 {
