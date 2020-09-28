@@ -45,16 +45,16 @@ func NewServer() (*Server, error) {
 
 	srv.RpcServer = grpc.NewServer(
 		grpc.StreamInterceptor(middleware.ChainStreamServer(
-			srv.StreamSessionServerInterceptor,
 			grpcZap.StreamServerInterceptor(logger),
 			grpcValidator.StreamServerInterceptor(),
 			grpcRecovery.StreamServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
+			srv.StreamSessionServerInterceptor,
 		)),
 		grpc.UnaryInterceptor(middleware.ChainUnaryServer(
-			srv.UnarySessionServerInterceptor,
 			grpcZap.UnaryServerInterceptor(logger),
 			grpcValidator.UnaryServerInterceptor(),
 			grpcRecovery.UnaryServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
+			srv.UnarySessionServerInterceptor,
 		)),
 	)
 
