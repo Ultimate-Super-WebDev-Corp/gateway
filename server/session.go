@@ -2,17 +2,22 @@ package server
 
 import (
 	"context"
+	"time"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/model"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/ulule/deepcopier"
+
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/model"
 )
 
 type sessionClaims struct {
 	jwt.StandardClaims
 	model.Session
 }
+
+const sessionTTL = 15 * time.Minute
 
 func (s Server) getSession(md map[string][]string) (*model.Session, error) {
 	strToken := md[mdToken]
@@ -31,6 +36,10 @@ func (s Server) getSession(md map[string][]string) (*model.Session, error) {
 		return nil, errors.New("invalid token claims")
 	}
 
+	updatedAt := time.Unix(0, claims.UpdatedAt)
+	if updatedAt.Add(sessionTTL).Before(time.Now().UTC()) {
+		return nil, errors.New("session is too old")
+	}
 	if claims.Session.Id == "" {
 		UUID, err := uuid.NewUUID()
 		if err != nil {
@@ -44,6 +53,7 @@ func (s Server) getSession(md map[string][]string) (*model.Session, error) {
 
 func (s Server) makeSessionToken(ctx context.Context) (string, error) {
 	session := SessionFromCtx(ctx)
+	session.UpdatedAt = time.Now().UTC().UnixNano()
 	respToken := jwt.NewWithClaims(jwt.SigningMethodHS256, sessionClaims{Session: *session})
 
 	strRespToken, err := respToken.SignedString([]byte(s.cfg.SecretKey))
@@ -63,7 +73,8 @@ func sessionToCtx(ctx context.Context, session *model.Session) context.Context {
 
 func SessionInCtxUpdate(ctx context.Context, newSession *model.Session) {
 	session := SessionFromCtx(ctx)
-	session.Id = newSession.Id
+	_ = deepcopier.Copy(newSession).To(session)
+	session.UpdatedAt = time.Now().UTC().UnixNano()
 }
 func SessionFromCtx(ctx context.Context) *model.Session {
 	session, ok := ctx.Value(ctxSessionMarkerKey).(*model.Session)

@@ -16,6 +16,7 @@ require (
 	github.com/mwitkow/go-proto-validators v0.3.2
 	github.com/olivere/elastic/v7 v7.0.20
 	github.com/pkg/errors v0.9.1
+	github.com/ulule/deepcopier v0.0.0-20200430083143-45decc6639b6
 	go.uber.org/zap v1.16.0
 	google.golang.org/api v0.32.0
 	google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d
