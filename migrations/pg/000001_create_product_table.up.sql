@@ -3,6 +3,8 @@ create table product (
     name varchar not null, -- todo unique ?
     brand varchar not null, -- todo unique ?
     description varchar not null,
+    images  varchar[],
+    country varchar,
     updated_at timestamp default current_timestamp -- todo trigger for auto update?
 );
 

@@ -26,7 +26,7 @@ func main() {
 	c := file.NewFileClient(conn)
 
 	ctx := metadata.NewOutgoingContext(context.Background(), metadata.MD{
-		"token": []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IiJ9.IJ9LcRwoX0nDaPKNgI-SvbmqIrLjjc0_rfp40Of65_k"},
+		"token": []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IiIsIlVwZGF0ZWRBdCI6MjYwMTMwNzczMjM1NDM5MTYwMH0.9X89JDfmp1pfG-j2nTEx67C04ojg2xyi1b3GAK9haYs"},
 	})
 
 	header := metadata.MD{}
@@ -35,7 +35,7 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 
-	f, err := os.Open("clients_test/file_uploader/photo_2020-09-21_22-44-27.jpg")
+	f, err := os.Open("clients_test/file/test1.png")
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

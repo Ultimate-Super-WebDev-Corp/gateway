@@ -6,6 +6,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
+	"github.com/lib/pq"
 	"github.com/olivere/elastic/v7"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -70,7 +71,7 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 	}
 
 	row := p.gatewayDB.
-		Select(fieldId, fieldName, fieldBrand, fieldDescription).
+		Select(fieldId, fieldName, fieldBrand, fieldDescription, fieldImages, fieldCountry).
 		From(objectProduct).
 		Where(squirrel.Eq{
 			fieldId: eRespProduct.Id,
@@ -81,7 +82,8 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 		Product: &product.ProductMsg{},
 	}
 	if err := row.Scan(
-		&resProduct.Id, &resProduct.Product.Name, &resProduct.Product.Brand, &resProduct.Product.Description,
+		&resProduct.Id, &resProduct.Product.Name, &resProduct.Product.Brand,
+		&resProduct.Product.Description, pq.Array(&resProduct.Product.Images), &resProduct.Product.Country,
 	); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

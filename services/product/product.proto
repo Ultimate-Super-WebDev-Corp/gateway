@@ -19,6 +19,8 @@ message ProductMsg {
   string Name = 1[(validator.field) = {string_not_empty: true}];
   string Brand = 2[(validator.field) = {string_not_empty: true}];
   string Description = 3[(validator.field) = {string_not_empty: true}];
+  repeated string Images = 4;
+  string country = 5;
 }
 
 message ProductWithID {
