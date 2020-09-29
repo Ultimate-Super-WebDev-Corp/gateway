@@ -7,10 +7,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
 func (fu File) Upload(stream file.File_UploadServer) error {
@@ -20,7 +21,7 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 	if _, err := fu.s3Client.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(bucket),
 	}); err != nil && !isBucketExists(err) {
-		return status.Error(codes.Internal, err.Error())
+		return server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	pr, pw := io.Pipe()
@@ -43,7 +44,7 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 			break
 		}
 		if err != nil {
-			return status.Error(codes.Internal, err.Error())
+			return server.NewErrServer(codes.Internal, errors.WithStack(err))
 		}
 		if fileUuid, errS3, asyncOk = asyncResp.getNotBlocking(); asyncOk {
 			break
@@ -60,14 +61,14 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 
 		case *file.Chunk_Chunk:
 			if !wasMeta {
-				return status.Error(codes.InvalidArgument, "the first message must be metadata")
+				return server.NewErrServer(codes.InvalidArgument, errors.New("the first message must be metadata"))
 			}
 			if _, errWrite := pw.Write(ch.Chunk); errWrite != nil {
-				return status.Error(codes.InvalidArgument, errWrite.Error())
+				return server.NewErrServer(codes.InvalidArgument, errors.WithStack(errWrite))
 			}
 
 		default:
-			return status.Error(codes.InvalidArgument, "unknown type of chunk")
+			return server.NewErrServer(codes.InvalidArgument, errors.New("unknown type of chunk"))
 		}
 	}
 
@@ -77,7 +78,7 @@ func (fu File) Upload(stream file.File_UploadServer) error {
 		fileUuid, errS3 = asyncResp.get()
 	}
 	if errS3 != nil {
-		return status.Error(codes.Internal, errS3.Error())
+		return server.NewErrServer(codes.Internal, errors.WithStack(errS3))
 	}
 
 	return stream.SendAndClose(&file.FileUploadResponse{UUID: fileUuid})

@@ -6,10 +6,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
 func (fu File) UpdateMetadata(_ context.Context, msg *file.UpdateFileMetadata) (*empty.Empty, error) {
@@ -19,7 +20,7 @@ func (fu File) UpdateMetadata(_ context.Context, msg *file.UpdateFileMetadata) (
 
 	partition, err := getPartition(msg.UUID)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, server.NewErrServer(codes.InvalidArgument, errors.WithStack(err))
 	}
 
 	bucket := makeBucketName(fu.s3Bucket, partition)
@@ -28,7 +29,7 @@ func (fu File) UpdateMetadata(_ context.Context, msg *file.UpdateFileMetadata) (
 		Key:    aws.String(msg.UUID),
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	meta := updateAWSMetadata(headObjectResp.Metadata, msg.Meta)
@@ -41,7 +42,7 @@ func (fu File) UpdateMetadata(_ context.Context, msg *file.UpdateFileMetadata) (
 		MetadataDirective: aws.String("REPLACE"),
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	return &empty.Empty{}, nil

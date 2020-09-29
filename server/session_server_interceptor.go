@@ -4,10 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 const mdToken = "token"
@@ -15,12 +15,12 @@ const mdToken = "token"
 func (s Server) UnarySessionServerInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "metadata is not provided")
+		return nil, NewErrServer(codes.Unauthenticated, errors.New("metadata is not provided"))
 	}
 
 	session, err := s.getSession(md)
 	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
+		return nil, NewErrServer(codes.Unauthenticated, errors.WithStack(err))
 	}
 
 	ctx = sessionToCtx(ctx, session)
@@ -31,12 +31,12 @@ func (s Server) UnarySessionServerInterceptor(ctx context.Context, req interface
 
 	respToken, err := s.makeSessionToken(ctx)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	err = grpc.SendHeader(ctx, metadata.Pairs(mdToken, respToken))
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	return resp, nil
@@ -46,12 +46,12 @@ func (s Server) StreamSessionServerInterceptor(srv interface{}, ss grpc.ServerSt
 	ctx := ss.Context()
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return status.Error(codes.Unauthenticated, "metadata is not provided")
+		return NewErrServer(codes.Unauthenticated, errors.New("metadata is not provided"))
 	}
 
 	session, err := s.getSession(md)
 	if err != nil {
-		return status.Error(codes.Unauthenticated, err.Error())
+		return NewErrServer(codes.Unauthenticated, errors.WithStack(err))
 	}
 
 	wrapped := newWrappedSessionServerStream(ss)
@@ -60,12 +60,12 @@ func (s Server) StreamSessionServerInterceptor(srv interface{}, ss grpc.ServerSt
 	wrapped.sendMsg = func(_ interface{}) error {
 		respToken, err := s.makeSessionToken(ctx)
 		if err != nil {
-			return status.Error(codes.Internal, err.Error())
+			return NewErrServer(codes.Internal, errors.WithStack(err))
 		}
 
 		err = ss.SetHeader(metadata.Pairs(mdToken, respToken))
 		if err != nil {
-			return status.Error(codes.Internal, err.Error())
+			return NewErrServer(codes.Internal, errors.WithStack(err))
 		}
 		return nil
 	}

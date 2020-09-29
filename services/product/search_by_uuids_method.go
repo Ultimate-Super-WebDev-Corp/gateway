@@ -8,11 +8,12 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/lib/pq"
 	"github.com/olivere/elastic/v7"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/product"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
 func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRequest) (*product.ProductWithID, error) {
@@ -38,7 +39,7 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 	}
 
 	if len(texts) == 0 {
-		return nil, status.Error(codes.NotFound, "text not recognized")
+		return nil, server.NewErrServer(codes.NotFound, errors.New("text not recognized"))
 	}
 
 	text := ""
@@ -58,16 +59,16 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 		Query(elasticQuery).
 		Size(eProductSize).Do(ctx)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	if searchRes.Hits == nil || len(searchRes.Hits.Hits) == 0 {
-		return nil, status.Error(codes.NotFound, "product not found")
+		return nil, server.NewErrServer(codes.NotFound, errors.New("product not found"))
 	}
 
 	eRespProduct := eProduct{}
 	if err := json.Unmarshal(searchRes.Hits.Hits[0].Source, &eRespProduct); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	row := p.gatewayDB.
@@ -85,7 +86,7 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 		&resProduct.Id, &resProduct.Product.Name, &resProduct.Product.Brand,
 		&resProduct.Product.Description, pq.Array(&resProduct.Product.Images), &resProduct.Product.Country,
 	); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	return &resProduct, nil

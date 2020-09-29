@@ -5,10 +5,10 @@ import (
 	"io"
 	"sync"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 func (s Server) UnarySessionClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
@@ -28,7 +28,7 @@ func (s Server) UnarySessionClientInterceptor(ctx context.Context, method string
 
 	session, err := s.getSession(header)
 	if err != nil {
-		return status.Error(codes.Internal, err.Error())
+		return NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 	SessionInCtxUpdate(ctx, session)
 	return nil
@@ -54,7 +54,7 @@ func (s Server) StreamSessionClientInterceptor(ctx context.Context, desc *grpc.S
 	newResp.recvMsg = func(_ interface{}) error {
 		session, err := s.getSession(header)
 		if err != nil {
-			return status.Error(codes.Internal, err.Error())
+			return NewErrServer(codes.Internal, errors.WithStack(err))
 		}
 		SessionInCtxUpdate(ctx, session)
 		return nil

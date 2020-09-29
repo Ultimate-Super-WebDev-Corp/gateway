@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/customer"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
@@ -15,12 +15,12 @@ import (
 func (c Customer) Create(ctx context.Context, msg *customer.CreateRequest) (*customer.CustomerMsg, error) {
 	session := server.SessionFromCtx(ctx)
 	if session.CustomerId != 0 {
-		return nil, status.Error(codes.PermissionDenied, "the session has a customer")
+		return nil, server.NewErrServer(codes.PermissionDenied, errors.New("the session has a customer"))
 	}
 
 	password, err := bcrypt.GenerateFromPassword([]byte(msg.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	query := c.gatewayDB.Insert(objectCustomer).
@@ -34,11 +34,11 @@ func (c Customer) Create(ctx context.Context, msg *customer.CreateRequest) (*cus
 		if pgErr, ok := err.(*pq.Error); ok {
 			switch pgErr.Code.Name() {
 			case "unique_violation":
-				return nil, status.Error(codes.AlreadyExists, "customer already exists")
+				return nil, server.NewErrServer(codes.AlreadyExists, errors.New("customer already exists"))
 			}
 		}
 
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
 	session.CustomerId = customerId

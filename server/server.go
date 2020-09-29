@@ -1,16 +1,19 @@
 package server
 
 import (
+	"context"
 	"net"
 	"runtime/debug"
 
 	"github.com/caarlos0/env/v6"
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpcZap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	grpcRecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpcValidator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -45,13 +48,13 @@ func NewServer() (*Server, error) {
 
 	srv.RpcServer = grpc.NewServer(
 		grpc.StreamInterceptor(middleware.ChainStreamServer(
-			grpcZap.StreamServerInterceptor(logger),
+			grpcZap.StreamServerInterceptor(logger, grpcZap.WithMessageProducer(srv.messageFunc)),
 			grpcValidator.StreamServerInterceptor(),
 			grpcRecovery.StreamServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
 			srv.StreamSessionServerInterceptor,
 		)),
 		grpc.UnaryInterceptor(middleware.ChainUnaryServer(
-			grpcZap.UnaryServerInterceptor(logger),
+			grpcZap.UnaryServerInterceptor(logger, grpcZap.WithMessageProducer(srv.messageFunc)),
 			grpcValidator.UnaryServerInterceptor(),
 			grpcRecovery.UnaryServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
 			srv.UnarySessionServerInterceptor,
@@ -96,4 +99,16 @@ func (s Server) GrpcDial() (*grpc.ClientConn, error) {
 func (s Server) recover(p interface{}) (err error) {
 	s.Logger.Sugar().Errorf("panic triggered: %v stacktrace from panic: %s", p, string(debug.Stack()))
 	return status.Errorf(codes.Internal, "panic triggered: %v", p)
+}
+
+func (s Server) messageFunc(ctx context.Context, msg string, level zapcore.Level, code codes.Code, err error, duration zapcore.Field) {
+	zapFields := make([]zap.Field, 0)
+	zapFields = append(zapFields, zap.Error(err))
+	zapFields = append(zapFields, zap.String("grpc.code", code.String()))
+	zapFields = append(zapFields, duration)
+	if err, ok := err.(interface{ StackTrace() errors.StackTrace }); ok {
+		zapFields = append(zapFields, zap.Any("stacktrace", err.StackTrace()))
+	}
+
+	ctxzap.Extract(ctx).Check(level, msg).Write(zapFields...)
 }

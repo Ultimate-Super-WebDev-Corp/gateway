@@ -12,6 +12,7 @@ func initZapLog(cfg config) *zap.Logger {
 		config = zap.NewDevelopmentConfig()
 	}
 
+	config.DisableStacktrace = true
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	config.EncoderConfig.TimeKey = "timestamp"
 	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
