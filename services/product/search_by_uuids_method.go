@@ -14,18 +14,6 @@ import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/product"
 )
 
-const (
-	objectProduct    = "product"
-	fieldId          = "id"
-	fieldBrand       = "brand"
-	fieldName        = "name"
-	fieldDescription = "description"
-	fieldUpdatedAt   = "updated_at"
-
-	eProductSize      = 1
-	eProductFuzziness = "2"
-)
-
 func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRequest) (*product.ProductWithID, error) {
 	logger := ctxzap.Extract(ctx)
 	textRecognitionFutures := map[string]textRecognitionByUUIDFuture{}

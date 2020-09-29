@@ -7,9 +7,10 @@ import "google/protobuf/empty.proto";
 import "github.com/mwitkow/go-proto-validators/validator.proto";
 
 service Customer {
-  rpc Create (CreateRequest) returns (google.protobuf.Empty) {}
+  rpc Create (CreateRequest) returns (CustomerMsg) {}
   rpc Get (google.protobuf.Empty) returns (CustomerMsg) {}
   rpc Login (LoginRequest) returns (CustomerMsg) {}
+  rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty) {}
 }
 
 message CustomerMsg {
@@ -19,7 +20,7 @@ message CustomerMsg {
 
 message CreateRequest {
   string Password = 1 [(validator.field) = {regex : "^.{4,}$"}];
-  CustomerMsg Customer = 2;
+  CustomerMsg Customer = 2[(validator.field) = {msg_exists : true}];
 }
 
 message LoginRequest {

@@ -36,6 +36,9 @@ func (this *CreateRequest) Validate() error {
 	if !_regex_CreateRequest_Password.MatchString(this.Password) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Password", fmt.Errorf(`value '%v' must be a string conforming to regex "^.{4,}$"`, this.Password))
 	}
+	if nil == this.Customer {
+		return github_com_mwitkow_go_proto_validators.FieldError("Customer", fmt.Errorf("message must exist"))
+	}
 	if this.Customer != nil {
 		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Customer); err != nil {
 			return github_com_mwitkow_go_proto_validators.FieldError("Customer", err)
