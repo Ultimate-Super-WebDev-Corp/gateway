@@ -18,14 +18,15 @@ func (c Customer) Create(ctx context.Context, msg *customer.CreateRequest) (*cus
 		return nil, server.NewErrServer(codes.PermissionDenied, errors.New("the session has a customer"))
 	}
 
-	password, err := bcrypt.GenerateFromPassword([]byte(msg.Password), bcrypt.DefaultCost)
+	password, err := generatePassword(msg.Password)
 	if err != nil {
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
+	passwordId := int64(1)
 	query := c.gatewayDB.Insert(objectCustomer).
-		Columns(fieldEmail, fieldPassword, fieldName).
-		Values(msg.Customer.Email, string(password), msg.Customer.Name).
+		Columns(fieldEmail, fieldPassword, fieldPasswordId, fieldName).
+		Values(msg.Customer.Email, password, passwordId, msg.Customer.Name).
 		Suffix("returning id").
 		QueryRow()
 
@@ -41,9 +42,22 @@ func (c Customer) Create(ctx context.Context, msg *customer.CreateRequest) (*cus
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
-	session.CustomerId = customerId
+	server.SessionLogin(session, customerId, passwordId)
 	return &customer.CustomerMsg{
 		Email: msg.Customer.Email,
 		Name:  msg.Customer.Name,
 	}, nil
+}
+
+func generatePassword(pass string) (string, error) {
+	password, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	return string(password), nil
+}
+
+func comparePassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(password), []byte(hashedPassword))
 }

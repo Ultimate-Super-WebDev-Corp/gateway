@@ -30,6 +30,15 @@ func (this *CustomerMsg) Validate() error {
 	return nil
 }
 
+var _regex_ChangePasswordRequest_NewPassword = regexp.MustCompile(`^.{4,}$`)
+
+func (this *ChangePasswordRequest) Validate() error {
+	if !_regex_ChangePasswordRequest_NewPassword.MatchString(this.NewPassword) {
+		return github_com_mwitkow_go_proto_validators.FieldError("NewPassword", fmt.Errorf(`value '%v' must be a string conforming to regex "^.{4,}$"`, this.NewPassword))
+	}
+	return nil
+}
+
 var _regex_CreateRequest_Password = regexp.MustCompile(`^.{4,}$`)
 
 func (this *CreateRequest) Validate() error {

@@ -9,7 +9,6 @@ import (
 )
 
 func (c Customer) Logout(ctx context.Context, _ *empty.Empty) (*empty.Empty, error) {
-	session := server.SessionFromCtx(ctx)
-	session.CustomerId = 0
+	server.SessionLogout(server.SessionFromCtx(ctx))
 	return &empty.Empty{}, nil
 }

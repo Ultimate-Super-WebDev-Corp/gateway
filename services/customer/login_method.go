@@ -20,29 +20,30 @@ func (c Customer) Login(ctx context.Context, msg *customer.LoginRequest) (*custo
 	}
 
 	customerId := int64(0)
+	passwordId := int64(0)
 	password := ""
 	resp := &customer.CustomerMsg{}
 
-	row := c.gatewayDB.Select(fieldId, fieldEmail, fieldName, fieldPassword).
+	row := c.gatewayDB.Select(fieldId, fieldEmail, fieldName, fieldPassword, fieldPasswordId).
 		From(objectCustomer).
 		Where(squirrel.Eq{
 			fieldEmail: msg.Email,
 		})
 
-	if err := row.Scan(&customerId, &resp.Email, &resp.Name, &password); err != nil {
+	if err := row.Scan(&customerId, &resp.Email, &resp.Name, &password, &passwordId); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, server.NewErrServer(codes.NotFound, errors.New("customer not found"))
 		}
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(password), []byte(msg.Password)); err != nil {
+	if err := comparePassword(password, msg.Password); err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
 			return nil, server.NewErrServer(codes.NotFound, errors.New("wrong password"))
 		}
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
-	session.CustomerId = customerId
+	server.SessionLogin(session, customerId, passwordId)
 	return resp, nil
 }

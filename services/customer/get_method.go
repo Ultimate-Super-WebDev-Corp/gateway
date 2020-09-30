@@ -2,6 +2,7 @@ package customer
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -22,10 +23,15 @@ func (c Customer) Get(ctx context.Context, _ *empty.Empty) (*customer.CustomerMs
 	row := c.gatewayDB.Select(fieldEmail, fieldName).
 		From(objectCustomer).
 		Where(squirrel.Eq{
-			fieldId: session.CustomerId,
+			fieldId:         session.CustomerId,
+			fieldPasswordId: session.PasswordId,
 		})
 
 	if err := row.Scan(&resp.Email, &resp.Name); err != nil {
+		if err == sql.ErrNoRows {
+			server.SessionLogout(session)
+			return nil, server.NewErrServer(codes.Unauthenticated, errors.New("session has no customer"))
+		}
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 	return resp, nil

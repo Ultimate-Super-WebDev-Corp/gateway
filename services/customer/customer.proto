@@ -11,11 +11,16 @@ service Customer {
   rpc Get (google.protobuf.Empty) returns (CustomerMsg) {}
   rpc Login (LoginRequest) returns (CustomerMsg) {}
   rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc ChangePassword (ChangePasswordRequest) returns (google.protobuf.Empty) {}
 }
 
 message CustomerMsg {
   string Email = 1 [(validator.field) = {regex : "^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,4}$"}];
   string Name = 2 [(validator.field) = {string_not_empty : true}];
+}
+
+message ChangePasswordRequest {
+  string NewPassword = 1 [(validator.field) = {regex : "^.{4,}$"}];
 }
 
 message CreateRequest {

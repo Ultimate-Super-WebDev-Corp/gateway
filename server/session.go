@@ -82,10 +82,21 @@ func SessionInCtxUpdate(ctx context.Context, newSession *model.Session) {
 	_ = deepcopier.Copy(newSession).To(session)
 	session.UpdatedAt = time.Now().UTC().UnixNano()
 }
+
 func SessionFromCtx(ctx context.Context) *model.Session {
 	session, ok := ctx.Value(ctxSessionMarkerKey).(*model.Session)
 	if !ok || session == nil {
 		return &model.Session{} //todo return error?
 	}
 	return session
+}
+
+func SessionLogout(s *model.Session) {
+	s.CustomerId = 0
+	s.PasswordId = 0
+}
+
+func SessionLogin(s *model.Session, cusId int64, passId int64) {
+	s.CustomerId = cusId
+	s.PasswordId = passId
 }
