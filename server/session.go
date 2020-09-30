@@ -6,8 +6,10 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/pkg/errors"
 	"github.com/ulule/deepcopier"
+	"go.uber.org/zap"
 
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/model"
 )
@@ -68,6 +70,10 @@ var ctxSessionMarkerKey = &ctxSessionMarker{}
 type ctxSessionMarker struct{}
 
 func sessionToCtx(ctx context.Context, session *model.Session) context.Context {
+	ctxzap.AddFields(ctx,
+		zap.String("session_id", session.Id),
+		zap.Int64("customer_id", session.CustomerId))
+
 	return context.WithValue(ctx, ctxSessionMarkerKey, session)
 }
 

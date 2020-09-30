@@ -51,12 +51,14 @@ func NewServer() (*Server, error) {
 			grpcZap.StreamServerInterceptor(logger, grpcZap.WithMessageProducer(srv.messageFunc)),
 			grpcValidator.StreamServerInterceptor(),
 			grpcRecovery.StreamServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
+			srv.StreamRequestIdServerInterceptor,
 			srv.StreamSessionServerInterceptor,
 		)),
 		grpc.UnaryInterceptor(middleware.ChainUnaryServer(
 			grpcZap.UnaryServerInterceptor(logger, grpcZap.WithMessageProducer(srv.messageFunc)),
 			grpcValidator.UnaryServerInterceptor(),
 			grpcRecovery.UnaryServerInterceptor(grpcRecovery.WithRecoveryHandler(srv.recover)),
+			srv.UnaryRequestIdServerInterceptor,
 			srv.UnarySessionServerInterceptor,
 		)),
 	)
@@ -86,10 +88,12 @@ func (s Server) GrpcDial() (*grpc.ClientConn, error) {
 		"localhost"+s.cfg.Port, grpc.WithInsecure(),
 		grpc.WithStreamInterceptor(
 			middleware.ChainStreamClient(
+				s.StreamRequestIdClientInterceptor,
 				s.StreamSessionClientInterceptor,
 			)),
 		grpc.WithUnaryInterceptor(
 			middleware.ChainUnaryClient(
+				s.UnaryRequestIdClientInterceptor,
 				s.UnarySessionClientInterceptor,
 			)),
 	)

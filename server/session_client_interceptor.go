@@ -17,7 +17,7 @@ func (s Server) UnarySessionClientInterceptor(ctx context.Context, method string
 		return err
 	}
 
-	outCtx := metadata.NewOutgoingContext(ctx, metadata.Pairs(mdToken, token))
+	outCtx := metadata.AppendToOutgoingContext(ctx, mdToken, token)
 
 	var header metadata.MD
 	opts = append(opts, grpc.Header(&header))
@@ -40,7 +40,7 @@ func (s Server) StreamSessionClientInterceptor(ctx context.Context, desc *grpc.S
 		return nil, err
 	}
 
-	outCtx := metadata.NewOutgoingContext(ctx, metadata.Pairs(mdToken, token))
+	outCtx := metadata.AppendToOutgoingContext(ctx, mdToken, token)
 
 	var header metadata.MD
 	opts = append(opts, grpc.Header(&header))
