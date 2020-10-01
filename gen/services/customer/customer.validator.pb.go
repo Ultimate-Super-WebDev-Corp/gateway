@@ -68,3 +68,6 @@ func (this *LoginRequest) Validate() error {
 	}
 	return nil
 }
+func (this *UpdateRequest) Validate() error {
+	return nil
+}

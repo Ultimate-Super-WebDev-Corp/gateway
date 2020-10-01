@@ -11,7 +11,7 @@ import (
 
 const mdToken = "token"
 
-func (s Server) UnarySessionServerInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+func (s Server) UnarySessionServerInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, NewErrServer(codes.Unauthenticated, errors.New("metadata is not provided"))
@@ -21,27 +21,24 @@ func (s Server) UnarySessionServerInterceptor(ctx context.Context, req interface
 	if err != nil {
 		return nil, NewErrServer(codes.Unauthenticated, errors.WithStack(err))
 	}
-
 	ctx = sessionToCtx(ctx, session)
-	resp, err := handler(ctx, req)
-	if err != nil {
-		return nil, err
-	}
 
-	respToken, err := s.makeSessionToken(ctx)
-	if err != nil {
-		return nil, NewErrServer(codes.Internal, errors.WithStack(err))
-	}
+	defer func() {
+		respToken, err := s.makeSessionToken(ctx)
+		if err != nil {
+			return
+		}
 
-	err = grpc.SendHeader(ctx, metadata.Pairs(mdToken, respToken))
-	if err != nil {
-		return nil, NewErrServer(codes.Internal, errors.WithStack(err))
-	}
+		err = grpc.SendHeader(ctx, metadata.Pairs(mdToken, respToken))
+		if err != nil {
+			return
+		}
+	}()
 
-	return resp, nil
+	return handler(ctx, req)
 }
 
-func (s Server) StreamSessionServerInterceptor(srv interface{}, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+func (s Server) StreamSessionServerInterceptor(srv interface{}, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
 	wrapped := newWrappedServerStream(ss)
 	md, ok := metadata.FromIncomingContext(wrapped.wrappedContext)
 	if !ok {
@@ -54,7 +51,7 @@ func (s Server) StreamSessionServerInterceptor(srv interface{}, ss grpc.ServerSt
 	}
 
 	wrapped.wrappedContext = sessionToCtx(wrapped.wrappedContext, session)
-	wrapped.sendMsg = func(_ interface{}) error {
+	wrapped.sendMsg = func() error {
 		respToken, err := s.makeSessionToken(wrapped.wrappedContext)
 		if err != nil {
 			return NewErrServer(codes.Internal, errors.WithStack(err))
@@ -67,5 +64,10 @@ func (s Server) StreamSessionServerInterceptor(srv interface{}, ss grpc.ServerSt
 		return nil
 	}
 
+	defer func() {
+		wrapped.once.Do(func() {
+			err = wrapped.sendMsg()
+		})
+	}()
 	return handler(srv, wrapped)
 }

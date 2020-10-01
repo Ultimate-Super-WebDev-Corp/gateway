@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func (s Server) UnarySessionClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+func (s Server) UnarySessionClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
 	token, err := s.makeSessionToken(ctx)
 	if err != nil {
 		return err
@@ -21,17 +21,16 @@ func (s Server) UnarySessionClientInterceptor(ctx context.Context, method string
 
 	var header metadata.MD
 	opts = append(opts, grpc.Header(&header))
-	err = invoker(outCtx, method, req, reply, cc, opts...)
-	if err != nil {
-		return err
-	}
 
-	session, err := s.getSession(header)
-	if err != nil {
-		return NewErrServer(codes.Internal, errors.WithStack(err))
-	}
-	SessionInCtxUpdate(ctx, session)
-	return nil
+	defer func() {
+		session, err := s.getSession(header)
+		if err != nil {
+			return
+		}
+		SessionInCtxUpdate(ctx, session)
+	}()
+
+	return invoker(outCtx, method, req, reply, cc, opts...)
 }
 
 func (s Server) StreamSessionClientInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {

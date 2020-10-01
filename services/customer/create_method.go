@@ -2,6 +2,7 @@ package customer
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -27,7 +28,7 @@ func (c Customer) Create(ctx context.Context, msg *customer.CreateRequest) (*cus
 	query := c.gatewayDB.Insert(objectCustomer).
 		Columns(fieldEmail, fieldPassword, fieldPasswordId, fieldName).
 		Values(msg.Customer.Email, password, passwordId, msg.Customer.Name).
-		Suffix("returning id").
+		Suffix(fmt.Sprintf("returning %s", fieldId)).
 		QueryRow()
 
 	customerId := int64(0)
@@ -59,5 +60,5 @@ func generatePassword(pass string) (string, error) {
 }
 
 func comparePassword(hashedPassword, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(password), []byte(hashedPassword))
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

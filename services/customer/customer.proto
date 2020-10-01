@@ -12,6 +12,7 @@ service Customer {
   rpc Login (LoginRequest) returns (CustomerMsg) {}
   rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty) {}
   rpc ChangePassword (ChangePasswordRequest) returns (google.protobuf.Empty) {}
+  rpc Update (UpdateRequest) returns (CustomerMsg) {}
 }
 
 message CustomerMsg {
@@ -31,4 +32,8 @@ message CreateRequest {
 message LoginRequest {
   string Email = 1 [(validator.field) = {regex : "^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,4}$"}];
   string Password = 2 [(validator.field) = {regex : "^.{4,}$"}];
+}
+
+message UpdateRequest {
+  string Name = 1;
 }

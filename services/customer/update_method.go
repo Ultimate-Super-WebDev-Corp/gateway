@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 
@@ -14,30 +13,34 @@ import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
-func (c Customer) ChangePassword(ctx context.Context, msg *customer.ChangePasswordRequest) (*empty.Empty, error) {
+func (c Customer) Update(ctx context.Context, msg *customer.UpdateRequest) (*customer.CustomerMsg, error) {
 	session := server.SessionFromCtx(ctx)
 	if session.CustomerId == 0 {
 		return nil, server.NewErrServer(codes.Unauthenticated, errors.New("session has no customer"))
 	}
 
-	password, err := generatePassword(msg.NewPassword)
-	if err != nil {
-		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
-	}
-
-	res := c.gatewayDB.
+	updBuilder := c.gatewayDB.
 		Update(objectCustomer).
-		Set(fieldPassword, password).
-		Set(fieldPasswordId, squirrel.ConcatExpr(fieldPasswordId, " + 1")).
 		Where(squirrel.Eq{
 			fieldId:         session.CustomerId,
 			fieldPasswordId: session.PasswordId,
 		}).
-		Suffix(fmt.Sprintf("returning %s", fieldPasswordId)).
-		QueryRow()
+		Suffix(fmt.Sprintf("returning %s, %s", fieldName, fieldEmail))
 
-	passwordId := int64(0)
-	if err := res.Scan(&passwordId); err != nil {
+	wasSet := false
+	if len(msg.Name) > 0 {
+		wasSet = true
+		updBuilder = updBuilder.Set(fieldName, msg.Name)
+	}
+
+	if !wasSet {
+		return nil, server.NewErrServer(codes.InvalidArgument, errors.New("no updates"))
+	}
+
+	query := updBuilder.QueryRow()
+
+	resp := customer.CustomerMsg{}
+	if err := query.Scan(&resp.Name, &resp.Email); err != nil {
 		if err == sql.ErrNoRows {
 			server.SessionLogout(session)
 			return nil, server.NewErrServer(codes.Unauthenticated, errors.New("session has no customer"))
@@ -45,6 +48,5 @@ func (c Customer) ChangePassword(ctx context.Context, msg *customer.ChangePasswo
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
-	server.SessionLogin(session, session.CustomerId, passwordId)
-	return &empty.Empty{}, nil
+	return &resp, nil
 }

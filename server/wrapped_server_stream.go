@@ -10,14 +10,14 @@ import (
 type wrappedServerStream struct {
 	grpc.ServerStream
 	wrappedContext context.Context
-	sendMsg        func(m interface{}) error
+	sendMsg        func() error
 	once           *sync.Once
 }
 
 func (w wrappedServerStream) SendMsg(m interface{}) error {
 	var err error
 	w.once.Do(func() {
-		err = w.sendMsg(m)
+		err = w.sendMsg()
 	})
 	if err != nil {
 		return err
