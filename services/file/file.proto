@@ -13,7 +13,7 @@ service File {
 }
 
 message FileUUID {
-  string UUID = 1[(validator.field) = {string_not_empty: true}];
+  string UUID = 1 [(validator.field) = {string_not_empty: true}];
 }
 
 message FileURLs {
@@ -42,6 +42,6 @@ enum FileType {
 }
 
 message UpdateFileMetadata {
-  string UUID = 1[(validator.field) = {string_not_empty: true}];
+  string UUID = 1 [(validator.field) = {string_not_empty: true}];
   FileMetadata Meta = 2;
 }

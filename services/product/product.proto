@@ -8,17 +8,17 @@ import "google/protobuf/empty.proto";
 
 service Product {
   rpc SearchByUUIDs (SearchByUUIDsRequest) returns (ProductWithID) {}
-  rpc Insert (ProductMsg) returns(google.protobuf.Empty) {}
+  rpc Create (ProductMsg) returns(google.protobuf.Empty) {}
 }
 
 message SearchByUUIDsRequest {
-  repeated string UUIDs = 1[(validator.field) = {repeated_count_min: 1}];
+  repeated string UUIDs = 1 [(validator.field) = {repeated_count_min: 1}];
 }
 
 message ProductMsg {
-  string Name = 1[(validator.field) = {string_not_empty: true}];
-  string Brand = 2[(validator.field) = {string_not_empty: true}];
-  string Description = 3[(validator.field) = {string_not_empty: true}];
+  string Name = 1 [(validator.field) = {string_not_empty: true}];
+  string Brand = 2 [(validator.field) = {string_not_empty: true}];
+  string Description = 3 [(validator.field) = {string_not_empty: true}];
   repeated string Images = 4;
   string country = 5;
 }

@@ -1,0 +1,54 @@
+syntax = "proto3";
+package comment;
+
+option go_package = "gen/services/comment";
+
+import "google/protobuf/empty.proto";
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+service Comment {
+  rpc Create (CreateRequest) returns(google.protobuf.Empty) {}
+  rpc CreateFromSource (CreateRequest) returns(google.protobuf.Empty) {}
+  rpc List(ListRequest) returns(ListResponse) {}
+}
+
+message CreateRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+  string Text = 2 [(validator.field) = {string_not_empty : true}];
+  Rating Rating = 3;
+}
+
+message CreateFromSourceRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+  string Text = 2 [(validator.field) = {string_not_empty : true}];
+  string Source = 3 [(validator.field) = {string_not_empty : true}];
+  string Name = 4 [(validator.field) = {string_not_empty : true}];;
+  Rating Rating = 5;
+}
+
+message ListRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+  uint64 Offset = 2;
+  uint64 Limit = 3;
+}
+message ListResponse {
+  repeated CommentMsg Comments = 1;
+  uint64 NextOffset = 2;
+}
+
+message CommentMsg {
+  string Text = 2 [(validator.field) = {string_not_empty : true}];
+  string Source = 3 [(validator.field) = {string_not_empty : true}];
+  Rating Rating = 4;
+  string Name = 5 [(validator.field) = {string_not_empty : true}];;
+  string CreatedAt = 6;
+}
+
+enum Rating {
+  ZERO_STARS = 0;
+  ONE_STARS = 1;
+  TWO_STARS = 2;
+  THREE_STARS = 3;
+  FOUR_STARS = 4;
+  FIVE_STARS = 5;
+}

@@ -247,7 +247,7 @@ var file_services_product_product_proto_rawDesc = []byte{
 	0x2e, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x42, 0x79, 0x55, 0x55, 0x49, 0x44, 0x73, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x2e,
 	0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x57, 0x69, 0x74, 0x68, 0x49, 0x44, 0x22, 0x00, 0x12,
-	0x37, 0x0a, 0x06, 0x49, 0x6e, 0x73, 0x65, 0x72, 0x74, 0x12, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x64,
+	0x37, 0x0a, 0x06, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x12, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x64,
 	0x75, 0x63, 0x74, 0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x4d, 0x73, 0x67, 0x1a, 0x16,
 	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
 	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x16, 0x5a, 0x14, 0x67, 0x65, 0x6e, 0x2f,
@@ -277,9 +277,9 @@ var file_services_product_product_proto_goTypes = []interface{}{
 var file_services_product_product_proto_depIdxs = []int32{
 	1, // 0: product.ProductWithID.Product:type_name -> product.ProductMsg
 	0, // 1: product.Product.SearchByUUIDs:input_type -> product.SearchByUUIDsRequest
-	1, // 2: product.Product.Insert:input_type -> product.ProductMsg
+	1, // 2: product.Product.Create:input_type -> product.ProductMsg
 	2, // 3: product.Product.SearchByUUIDs:output_type -> product.ProductWithID
-	3, // 4: product.Product.Insert:output_type -> google.protobuf.Empty
+	3, // 4: product.Product.Create:output_type -> google.protobuf.Empty
 	3, // [3:5] is the sub-list for method output_type
 	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -363,7 +363,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ProductClient interface {
 	SearchByUUIDs(ctx context.Context, in *SearchByUUIDsRequest, opts ...grpc.CallOption) (*ProductWithID, error)
-	Insert(ctx context.Context, in *ProductMsg, opts ...grpc.CallOption) (*empty.Empty, error)
+	Create(ctx context.Context, in *ProductMsg, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type productClient struct {
@@ -383,9 +383,9 @@ func (c *productClient) SearchByUUIDs(ctx context.Context, in *SearchByUUIDsRequ
 	return out, nil
 }
 
-func (c *productClient) Insert(ctx context.Context, in *ProductMsg, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *productClient) Create(ctx context.Context, in *ProductMsg, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/product.Product/Insert", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/product.Product/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -395,7 +395,7 @@ func (c *productClient) Insert(ctx context.Context, in *ProductMsg, opts ...grpc
 // ProductServer is the server API for Product service.
 type ProductServer interface {
 	SearchByUUIDs(context.Context, *SearchByUUIDsRequest) (*ProductWithID, error)
-	Insert(context.Context, *ProductMsg) (*empty.Empty, error)
+	Create(context.Context, *ProductMsg) (*empty.Empty, error)
 }
 
 // UnimplementedProductServer can be embedded to have forward compatible implementations.
@@ -405,8 +405,8 @@ type UnimplementedProductServer struct {
 func (*UnimplementedProductServer) SearchByUUIDs(context.Context, *SearchByUUIDsRequest) (*ProductWithID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchByUUIDs not implemented")
 }
-func (*UnimplementedProductServer) Insert(context.Context, *ProductMsg) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Insert not implemented")
+func (*UnimplementedProductServer) Create(context.Context, *ProductMsg) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 
 func RegisterProductServer(s *grpc.Server, srv ProductServer) {
@@ -431,20 +431,20 @@ func _Product_SearchByUUIDs_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Product_Insert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Product_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProductMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductServer).Insert(ctx, in)
+		return srv.(ProductServer).Create(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/product.Product/Insert",
+		FullMethod: "/product.Product/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductServer).Insert(ctx, req.(*ProductMsg))
+		return srv.(ProductServer).Create(ctx, req.(*ProductMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -458,8 +458,8 @@ var _Product_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Product_SearchByUUIDs_Handler,
 		},
 		{
-			MethodName: "Insert",
-			Handler:    _Product_Insert_Handler,
+			MethodName: "Create",
+			Handler:    _Product_Create_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

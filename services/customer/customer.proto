@@ -26,7 +26,7 @@ message ChangePasswordRequest {
 
 message CreateRequest {
   string Password = 1 [(validator.field) = {regex : "^.{4,}$"}];
-  CustomerMsg Customer = 2[(validator.field) = {msg_exists : true}];
+  CustomerMsg Customer = 2 [(validator.field) = {msg_exists : true}];
 }
 
 message LoginRequest {
@@ -35,5 +35,5 @@ message LoginRequest {
 }
 
 message UpdateRequest {
-  string Name = 1;
+  string Name = 1 [(validator.field) = {string_not_empty : true}];
 }

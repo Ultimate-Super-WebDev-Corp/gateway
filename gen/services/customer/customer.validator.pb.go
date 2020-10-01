@@ -69,5 +69,8 @@ func (this *LoginRequest) Validate() error {
 	return nil
 }
 func (this *UpdateRequest) Validate() error {
+	if this.Name == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Name", fmt.Errorf(`value '%v' must not be an empty string`, this.Name))
+	}
 	return nil
 }

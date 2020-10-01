@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/comment"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/customer"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/file"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/product"
@@ -34,8 +35,17 @@ func main() {
 		panic(err)
 	}
 
-	err = customer.NewCustomer(customer.Dependences{
+	customerCli, err := customer.NewCustomer(customer.Dependences{
 		Registrar: srv.RpcServer,
+		GrpcConn:  grpcConn,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = comment.NewComment(comment.Dependences{
+		Registrar:   srv.RpcServer,
+		CustomerCli: customerCli,
 	})
 	if err != nil {
 		panic(err)

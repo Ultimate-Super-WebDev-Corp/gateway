@@ -76,7 +76,7 @@ func productInsert() {
 	err = json.Unmarshal(allF, &aDerms)
 	fmt.Println(err)
 	for _, derm := range aDerms {
-		_, err := c.Insert(ctx, &product.ProductMsg{
+		_, err := c.Create(ctx, &product.ProductMsg{
 			Name:        derm.Name,
 			Brand:       derm.Brand,
 			Description: derm.Description,

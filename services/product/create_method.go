@@ -13,7 +13,7 @@ import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
-func (p Product) Insert(_ context.Context, msg *product.ProductMsg) (*empty.Empty, error) {
+func (p Product) Create(_ context.Context, msg *product.ProductMsg) (*empty.Empty, error) {
 	_, err := p.gatewayDB.
 		Insert(objectProduct).
 		Columns(fieldName, fieldBrand, fieldDescription, fieldImages, fieldCountry, fieldUpdatedAt).
