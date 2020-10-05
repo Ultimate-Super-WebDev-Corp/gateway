@@ -1,4 +1,4 @@
-package comment
+package review
 
 import (
 	"database/sql"
@@ -8,11 +8,11 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/comment"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/customer"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/review"
 )
 
-type Comment struct {
+type Review struct {
 	gatewayDB   squirrel.StatementBuilderType
 	customerCli customer.CustomerClient
 }
@@ -26,7 +26,7 @@ type Dependences struct {
 	CustomerCli customer.CustomerClient
 }
 
-func NewComment(dep Dependences) error {
+func NewReview(dep Dependences) error {
 	cfg := config{}
 	if err := env.Parse(&cfg); err != nil {
 		return errors.WithStack(err)
@@ -41,12 +41,12 @@ func NewComment(dep Dependences) error {
 		return errors.WithStack(err)
 	}
 
-	c := &Comment{
+	c := &Review{
 		gatewayDB:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(gatewayDB),
 		customerCli: dep.CustomerCli,
 	}
 
-	comment.RegisterCommentServer(dep.Registrar, c)
+	review.RegisterReviewServer(dep.Registrar, c)
 
 	return nil
 }

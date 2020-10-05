@@ -15,7 +15,7 @@ import (
 
 func (c Customer) Update(ctx context.Context, msg *customer.UpdateRequest) (*customer.CustomerMsg, error) {
 	session := server.SessionFromCtx(ctx)
-	if session.CustomerId == 0 {
+	if !server.IsSessionLoggedIn(session) {
 		return nil, server.NewErrServer(codes.Unauthenticated, errors.New("session has no customer"))
 	}
 

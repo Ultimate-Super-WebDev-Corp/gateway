@@ -6,3 +6,5 @@ create table customer (
     password_id integer not null,
     unique(email)
 );
+
+select setval(pg_get_serial_sequence('customer', 'id'), 1000, false);

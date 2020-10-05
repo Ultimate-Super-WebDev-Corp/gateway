@@ -15,7 +15,7 @@ import (
 
 func (c Customer) Login(ctx context.Context, msg *customer.LoginRequest) (*customer.CustomerMsg, error) {
 	session := server.SessionFromCtx(ctx)
-	if session.CustomerId != 0 {
+	if server.IsSessionLoggedIn(session) {
 		return nil, server.NewErrServer(codes.PermissionDenied, errors.New("the session has a customer"))
 	}
 

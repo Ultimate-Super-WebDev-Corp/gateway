@@ -1,4 +1,4 @@
-package comment
+package review
 
 import (
 	"context"
@@ -8,13 +8,17 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/comment"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/review"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
-func (c Comment) Create(ctx context.Context, msg *comment.CreateRequest) (*empty.Empty, error) {
+func (c Review) CreateComment(ctx context.Context, msg *review.CreateCommentRequest) (*empty.Empty, error) {
+	if msg.Rating == review.Rating_UNDEFINED {
+		return nil, server.NewErrServer(codes.InvalidArgument, errors.New("rating must not be UNDEFINED"))
+	}
+
 	session := server.SessionFromCtx(ctx)
-	if session.CustomerId == 0 {
+	if !server.IsSessionLoggedIn(session) {
 		return nil, server.NewErrServer(codes.Unauthenticated, errors.New("session has no customer"))
 	}
 
@@ -26,10 +30,12 @@ func (c Comment) Create(ctx context.Context, msg *comment.CreateRequest) (*empty
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
+	//todo update product rating
+
 	if _, err := c.gatewayDB.
 		Insert(objectComment).
-		Columns(fieldProductId, fieldCustomerId, fieldName, fieldText).
-		Values(msg.ProductId, session.CustomerId, customer.Name, msg.Text).
+		Columns(fieldProductId, fieldCustomerId, fieldName, fieldText, fieldRating, fieldSource).
+		Values(msg.ProductId, session.CustomerId, customer.Name, msg.Text, msg.Rating, "").
 		Exec(); err != nil {
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}

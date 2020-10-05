@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/comment"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/customer"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/file"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/product"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/review"
 )
 
 func main() {
@@ -43,7 +43,7 @@ func main() {
 		panic(err)
 	}
 
-	err = comment.NewComment(comment.Dependences{
+	err = review.NewReview(review.Dependences{
 		Registrar:   srv.RpcServer,
 		CustomerCli: customerCli,
 	})

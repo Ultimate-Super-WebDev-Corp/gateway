@@ -63,7 +63,7 @@ func productInsert() {
 
 	c := product.NewProductClient(conn)
 	ctx := metadata.NewOutgoingContext(context.Background(), metadata.MD{
-		"token": []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IiIsIlVwZGF0ZWRBdCI6MjYwMTMwNzczMjM1NDM5MTYwMH0.9X89JDfmp1pfG-j2nTEx67C04ojg2xyi1b3GAK9haYs"},
+		"token": []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjEiLCJQYXNzd29yZElkIjotMSwiQ3VzdG9tZXJJZCI6MSwiVXBkYXRlZEF0IjoyNjAxMzA3NzMyMzU0MzkxNjAwfQ.AZsSe6JsFD_BAIHuVzCksj00wJJo3rfhJrkmSqjhJjo"},
 	})
 
 	f, err := os.Open("clients_test/product/A-Derma.json")

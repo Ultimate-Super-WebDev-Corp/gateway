@@ -13,7 +13,11 @@ import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
-func (p Product) Create(_ context.Context, msg *product.ProductMsg) (*empty.Empty, error) {
+func (p Product) Create(ctx context.Context, msg *product.ProductMsg) (*empty.Empty, error) {
+	session := server.SessionFromCtx(ctx)
+	if !server.IsSessionRoot(session) {
+		return nil, server.NewErrServer(codes.PermissionDenied, errors.New("permission denied"))
+	}
 	_, err := p.gatewayDB.
 		Insert(objectProduct).
 		Columns(fieldName, fieldBrand, fieldDescription, fieldImages, fieldCountry, fieldUpdatedAt).

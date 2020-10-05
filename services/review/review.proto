@@ -1,0 +1,59 @@
+syntax = "proto3";
+package review;
+
+option go_package = "gen/services/review";
+
+import "google/protobuf/empty.proto";
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+service Review {
+  rpc CreateComment (CreateCommentRequest) returns(google.protobuf.Empty) {}
+  rpc CreateCommentFromSource (CreateCommentFromSourceRequest) returns(google.protobuf.Empty) {}
+  rpc CommentList (CommentListRequest) returns (CommentListResponse) {}
+}
+
+message CreateCommentRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+  string Text = 2 [(validator.field) = {string_not_empty : true}];
+  Rating Rating = 3 [(validator.field) = {is_in_enum : 0}];
+}
+
+message CreateCommentFromSourceRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+  string Text = 2 [(validator.field) = {string_not_empty : true}];
+  string Source = 3 [(validator.field) = {string_not_empty : true}];
+  string Name = 4 [(validator.field) = {string_not_empty : true}];
+  Rating Rating = 5 [(validator.field) = {is_in_enum : 0}];
+}
+
+message CommentListRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+  uint64 Token = 2;
+  uint64 Limit = 3;
+}
+message CommentListResponse {
+  repeated Comment Comments = 1;
+  uint64 NextToken = 2;
+}
+
+message Comment {
+  string Text = 2 [(validator.field) = {string_not_empty : true}];
+  string Source = 3;
+  Rating Rating = 4 [(validator.field) = {is_in_enum : 0}];
+  string Name = 5 [(validator.field) = {string_not_empty : true}];
+  string CreatedAt = 6;
+}
+
+enum Rating {
+  UNDEFINED = 0;
+  HALF_STARS = 1;
+  ONE_STARS = 2;
+  ONE_AND_HALF_STARS = 3;
+  TWO_STARS = 4;
+  TWO_AND_HALF_STARS = 5;
+  THREE_STARS = 6;
+  THREE_AND_HALF_STARS = 7;
+  FOUR_STARS = 8;
+  FOUR_AND_HALF_STARS = 9;
+  FIVE_STARS = 10;
+}

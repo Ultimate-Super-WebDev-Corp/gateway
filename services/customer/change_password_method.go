@@ -16,7 +16,7 @@ import (
 
 func (c Customer) ChangePassword(ctx context.Context, msg *customer.ChangePasswordRequest) (*empty.Empty, error) {
 	session := server.SessionFromCtx(ctx)
-	if session.CustomerId == 0 {
+	if !server.IsSessionLoggedIn(session) {
 		return nil, server.NewErrServer(codes.Unauthenticated, errors.New("session has no customer"))
 	}
 

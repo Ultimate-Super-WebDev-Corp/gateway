@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	address = "localhost:8080"
+	address = "localhost:8081"
 )
 
 func TestCustomerFlow(t *testing.T) {

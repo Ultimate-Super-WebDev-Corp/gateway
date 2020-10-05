@@ -5,6 +5,7 @@ create table comment (
     name varchar not null,
     source varchar,
     customer_id integer,
+    rating integer,
     created_at timestamp default current_timestamp,
     FOREIGN KEY (product_id) references  product(id)
 );

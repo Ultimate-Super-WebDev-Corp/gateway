@@ -91,6 +91,13 @@ func SessionFromCtx(ctx context.Context) *model.Session {
 	return session
 }
 
+func IsSessionLoggedIn(s *model.Session) bool {
+	return s.CustomerId > 0
+}
+func IsSessionRoot(s *model.Session) bool {
+	return s.CustomerId > 0 && s.CustomerId < 1000 && s.PasswordId == -1
+
+}
 func SessionLogout(s *model.Session) {
 	s.CustomerId = 0
 	s.PasswordId = 0
