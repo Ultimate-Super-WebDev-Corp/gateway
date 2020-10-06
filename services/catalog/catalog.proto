@@ -1,0 +1,40 @@
+syntax = "proto3";
+package catalog;
+
+option go_package = "gen/services/catalog";
+
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+service Catalog {
+    rpc Search (SearchRequest) returns (SearchResponse){}
+}
+
+message SearchRequest {
+  Sort Sort = 1;
+}
+
+message SearchResponse {
+  repeated Product Products = 1;
+}
+
+message Product {
+  uint64 Id = 1;
+  string Name = 2;
+  string Brand = 3;
+}
+
+message Sort {
+  OrderBy OrderBy = 1;
+  Order Order = 2;
+}
+
+enum OrderBy {
+  NO_SORTING = 0;
+  RATING = 1;
+  VOTES = 2;
+}
+
+enum Order {
+  DESC = 0;
+  ASC = 1;
+}
