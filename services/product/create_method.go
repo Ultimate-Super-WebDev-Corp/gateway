@@ -18,10 +18,11 @@ func (p Product) Create(ctx context.Context, msg *product.ProductMsg) (*empty.Em
 	if !server.IsSessionRoot(session) {
 		return nil, server.NewErrServer(codes.PermissionDenied, errors.New("permission denied"))
 	}
-	_, err := p.gatewayDB.
+	_, err := p.statementBuilder.
 		Insert(objectProduct).
 		Columns(fieldName, fieldBrand, fieldDescription, fieldImages, fieldCountry, fieldUpdatedAt).
-		Values(msg.Name, msg.Brand, msg.Description, pq.Array(msg.Images), msg.Country, time.Now().UTC()).Exec()
+		Values(msg.Name, msg.Brand, msg.Description, pq.Array(msg.Images), msg.Country, time.Now().UTC()).
+		RunWith(p.gatewayDB).Exec()
 	if err != nil {
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}

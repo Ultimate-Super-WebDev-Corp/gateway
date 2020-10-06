@@ -20,12 +20,12 @@ func (c Customer) Get(ctx context.Context, _ *empty.Empty) (*customer.CustomerMs
 	}
 
 	resp := &customer.CustomerMsg{}
-	row := c.gatewayDB.Select(fieldEmail, fieldName).
+	row := c.statementBuilder.Select(fieldEmail, fieldName).
 		From(objectCustomer).
 		Where(squirrel.Eq{
 			fieldId:         session.CustomerId,
 			fieldPasswordId: session.PasswordId,
-		})
+		}).RunWith(c.gatewayDB).QueryRow()
 
 	if err := row.Scan(&resp.Email, &resp.Name); err != nil {
 		if err == sql.ErrNoRows {

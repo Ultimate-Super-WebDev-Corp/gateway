@@ -19,7 +19,7 @@ func (c Customer) Update(ctx context.Context, msg *customer.UpdateRequest) (*cus
 		return nil, server.NewErrServer(codes.Unauthenticated, errors.New("session has no customer"))
 	}
 
-	updBuilder := c.gatewayDB.
+	updBuilder := c.statementBuilder.
 		Update(objectCustomer).
 		Where(squirrel.Eq{
 			fieldId:         session.CustomerId,
@@ -37,7 +37,7 @@ func (c Customer) Update(ctx context.Context, msg *customer.UpdateRequest) (*cus
 		return nil, server.NewErrServer(codes.InvalidArgument, errors.New("no updates"))
 	}
 
-	query := updBuilder.QueryRow()
+	query := updBuilder.RunWith(c.gatewayDB).QueryRow()
 
 	resp := customer.CustomerMsg{}
 	if err := query.Scan(&resp.Name, &resp.Email); err != nil {

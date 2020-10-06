@@ -16,10 +16,11 @@ import (
 )
 
 type Product struct {
-	fileCli    file.FileClient
-	visionRR   *gcVisionRoundRobin
-	elasticCli *elastic.Client
-	gatewayDB  squirrel.StatementBuilderType
+	fileCli          file.FileClient
+	visionRR         *gcVisionRoundRobin
+	elasticCli       *elastic.Client
+	gatewayDB        *sql.DB
+	statementBuilder squirrel.StatementBuilderType
 }
 
 type config struct {
@@ -63,10 +64,11 @@ func NewProduct(dep Dependences) error {
 	}
 
 	pr := &Product{
-		fileCli:    dep.FileCli,
-		visionRR:   visionRR,
-		elasticCli: elasticCli,
-		gatewayDB:  squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(gatewayDB),
+		fileCli:          dep.FileCli,
+		visionRR:         visionRR,
+		elasticCli:       elasticCli,
+		gatewayDB:        gatewayDB,
+		statementBuilder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 
 	product.RegisterProductServer(dep.Registrar, pr)

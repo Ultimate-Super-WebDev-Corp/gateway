@@ -10,6 +10,8 @@ service Review {
   rpc CreateComment (CreateCommentRequest) returns(google.protobuf.Empty) {}
   rpc CreateCommentFromSource (CreateCommentFromSourceRequest) returns(google.protobuf.Empty) {}
   rpc CommentList (CommentListRequest) returns (CommentListResponse) {}
+  rpc CreateRatingFromSource (CreateRatingFromSourceRequest) returns(google.protobuf.Empty) {}
+  rpc GetRating (GetRatingRequest) returns(GetRatingResponse){}
 }
 
 message CreateCommentRequest {
@@ -21,9 +23,16 @@ message CreateCommentRequest {
 message CreateCommentFromSourceRequest {
   uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
   string Text = 2 [(validator.field) = {string_not_empty : true}];
-  string Source = 3 [(validator.field) = {string_not_empty : true}];
+  string Source = 3 [(validator.field) = {string_not_empty : true}]; //must not be customer or aggregated
   string Name = 4 [(validator.field) = {string_not_empty : true}];
   Rating Rating = 5 [(validator.field) = {is_in_enum : 0}];
+}
+
+message CreateRatingFromSourceRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+  string Source = 2 [(validator.field) = {string_not_empty : true}]; //must not be customer or aggregated
+  Rating Rating = 3 [(validator.field) = {is_in_enum : 0}];
+  uint64 Votes = 4 [(validator.field) = {int_gt : 0}];
 }
 
 message CommentListRequest {
@@ -42,6 +51,20 @@ message Comment {
   Rating Rating = 4 [(validator.field) = {is_in_enum : 0}];
   string Name = 5 [(validator.field) = {string_not_empty : true}];
   string CreatedAt = 6;
+}
+
+message GetRatingRequest {
+  uint64 ProductId = 1 [(validator.field) = {int_gt : 0}];
+}
+
+message GetRatingResponse {
+  repeated RatingWithSource Ratings = 1;
+}
+
+message RatingWithSource {
+  Rating Rating = 1;
+  uint64 Votes = 3;
+  string Source = 4;
 }
 
 enum Rating {

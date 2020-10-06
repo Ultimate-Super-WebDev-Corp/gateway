@@ -13,8 +13,9 @@ import (
 )
 
 type Review struct {
-	gatewayDB   squirrel.StatementBuilderType
-	customerCli customer.CustomerClient
+	customerCli      customer.CustomerClient
+	gatewayDB        *sql.DB
+	statementBuilder squirrel.StatementBuilderType
 }
 
 type config struct {
@@ -42,8 +43,9 @@ func NewReview(dep Dependences) error {
 	}
 
 	c := &Review{
-		gatewayDB:   squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(gatewayDB),
-		customerCli: dep.CustomerCli,
+		gatewayDB:        gatewayDB,
+		statementBuilder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
+		customerCli:      dep.CustomerCli,
 	}
 
 	review.RegisterReviewServer(dep.Registrar, c)

@@ -12,7 +12,8 @@ import (
 )
 
 type Customer struct {
-	gatewayDB squirrel.StatementBuilderType
+	gatewayDB        *sql.DB
+	statementBuilder squirrel.StatementBuilderType
 }
 
 type config struct {
@@ -40,7 +41,8 @@ func NewCustomer(dep Dependences) (customer.CustomerClient, error) {
 	}
 
 	cus := &Customer{
-		gatewayDB: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(gatewayDB),
+		gatewayDB:        gatewayDB,
+		statementBuilder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 
 	customer.RegisterCustomerServer(dep.Registrar, cus)

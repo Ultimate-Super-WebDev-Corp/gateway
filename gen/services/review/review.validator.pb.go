@@ -41,6 +41,18 @@ func (this *CreateCommentFromSourceRequest) Validate() error {
 	}
 	return nil
 }
+func (this *CreateRatingFromSourceRequest) Validate() error {
+	if !(this.ProductId > 0) {
+		return github_com_mwitkow_go_proto_validators.FieldError("ProductId", fmt.Errorf(`value '%v' must be greater than '0'`, this.ProductId))
+	}
+	if this.Source == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Source", fmt.Errorf(`value '%v' must not be an empty string`, this.Source))
+	}
+	if !(this.Votes > 0) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Votes", fmt.Errorf(`value '%v' must be greater than '0'`, this.Votes))
+	}
+	return nil
+}
 func (this *CommentListRequest) Validate() error {
 	if !(this.ProductId > 0) {
 		return github_com_mwitkow_go_proto_validators.FieldError("ProductId", fmt.Errorf(`value '%v' must be greater than '0'`, this.ProductId))
@@ -64,5 +76,24 @@ func (this *Comment) Validate() error {
 	if this.Name == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("Name", fmt.Errorf(`value '%v' must not be an empty string`, this.Name))
 	}
+	return nil
+}
+func (this *GetRatingRequest) Validate() error {
+	if !(this.ProductId > 0) {
+		return github_com_mwitkow_go_proto_validators.FieldError("ProductId", fmt.Errorf(`value '%v' must be greater than '0'`, this.ProductId))
+	}
+	return nil
+}
+func (this *GetRatingResponse) Validate() error {
+	for _, item := range this.Ratings {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Ratings", err)
+			}
+		}
+	}
+	return nil
+}
+func (this *RatingWithSource) Validate() error {
 	return nil
 }

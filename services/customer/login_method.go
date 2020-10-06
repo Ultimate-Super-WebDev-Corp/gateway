@@ -24,11 +24,11 @@ func (c Customer) Login(ctx context.Context, msg *customer.LoginRequest) (*custo
 	password := ""
 	resp := &customer.CustomerMsg{}
 
-	row := c.gatewayDB.Select(fieldId, fieldEmail, fieldName, fieldPassword, fieldPasswordId).
+	row := c.statementBuilder.Select(fieldId, fieldEmail, fieldName, fieldPassword, fieldPasswordId).
 		From(objectCustomer).
 		Where(squirrel.Eq{
 			fieldEmail: msg.Email,
-		})
+		}).RunWith(c.gatewayDB).QueryRow()
 
 	if err := row.Scan(&customerId, &resp.Email, &resp.Name, &password, &passwordId); err != nil {
 		if err == sql.ErrNoRows {

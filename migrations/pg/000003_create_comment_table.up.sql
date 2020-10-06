@@ -3,11 +3,11 @@ create table comment (
     product_id integer not null,
     text varchar not null,
     name varchar not null,
-    source varchar,
+    source varchar not null,
     customer_id integer,
-    rating integer,
+    rating integer not null,
     created_at timestamp default current_timestamp,
-    FOREIGN KEY (product_id) references  product(id)
+    foreign key (product_id) references  product(id)
 );
 
 create index ix_comment_product_id on comment (product_id);

@@ -11,14 +11,14 @@ import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
-func (c Review) CommentList(_ context.Context, msg *review.CommentListRequest) (*review.CommentListResponse, error) {
-	rows, err := c.gatewayDB.
+func (r Review) CommentList(_ context.Context, msg *review.CommentListRequest) (*review.CommentListResponse, error) {
+	rows, err := r.statementBuilder.
 		Select(fieldId, fieldText, fieldSource, fieldRating, fieldName, fieldCreatedAt).
 		From(objectComment).
 		Where(squirrel.And{
 			squirrel.Eq{fieldProductId: msg.ProductId},
 			squirrel.Gt{fieldId: msg.Token},
-		}).Limit(msg.Limit).Query()
+		}).Limit(msg.Limit).RunWith(r.gatewayDB).Query()
 	if err != nil {
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}

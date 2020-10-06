@@ -25,11 +25,11 @@ func (c Customer) Create(ctx context.Context, msg *customer.CreateRequest) (*cus
 	}
 
 	passwordId := int64(1)
-	query := c.gatewayDB.Insert(objectCustomer).
+	query := c.statementBuilder.Insert(objectCustomer).
 		Columns(fieldEmail, fieldPassword, fieldPasswordId, fieldName).
 		Values(msg.Customer.Email, password, passwordId, msg.Customer.Name).
 		Suffix(fmt.Sprintf("returning %s", fieldId)).
-		QueryRow()
+		RunWith(c.gatewayDB).QueryRow()
 
 	customerId := int64(0)
 	if err := query.Scan(&customerId); err != nil {

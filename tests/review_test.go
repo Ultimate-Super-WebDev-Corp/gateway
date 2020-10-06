@@ -54,4 +54,20 @@ func TestReview(t *testing.T) {
 	}
 
 	assert.Len(t, comments, 2)
+
+	ctx = metadata.NewOutgoingContext(context.Background(), metadata.Pairs(
+		"token", sessionWithRoot))
+	_, err = reviewCli.CreateRatingFromSource(ctx, &review.CreateRatingFromSourceRequest{
+		ProductId: 1,
+		Source:    "b",
+		Rating:    8,
+		Votes:     60,
+	})
+	assert.NoError(t, err)
+
+	getRatingResp, err := reviewCli.GetRating(ctx, &review.GetRatingRequest{
+		ProductId: 1,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, getRatingResp.Ratings, 4)
 }

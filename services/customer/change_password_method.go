@@ -25,7 +25,7 @@ func (c Customer) ChangePassword(ctx context.Context, msg *customer.ChangePasswo
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
-	res := c.gatewayDB.
+	res := c.statementBuilder.
 		Update(objectCustomer).
 		Set(fieldPassword, password).
 		Set(fieldPasswordId, squirrel.ConcatExpr(fieldPasswordId, " + 1")).
@@ -34,7 +34,7 @@ func (c Customer) ChangePassword(ctx context.Context, msg *customer.ChangePasswo
 			fieldPasswordId: session.PasswordId,
 		}).
 		Suffix(fmt.Sprintf("returning %s", fieldPasswordId)).
-		QueryRow()
+		RunWith(c.gatewayDB).QueryRow()
 
 	passwordId := int64(0)
 	if err := res.Scan(&passwordId); err != nil {

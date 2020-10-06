@@ -71,13 +71,12 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
-	row := p.gatewayDB.
+	row := p.statementBuilder.
 		Select(fieldId, fieldName, fieldBrand, fieldDescription, fieldImages, fieldCountry).
 		From(objectProduct).
 		Where(squirrel.Eq{
 			fieldId: eRespProduct.Id,
-		}).
-		QueryRow()
+		}).RunWith(p.gatewayDB).QueryRow()
 
 	resProduct := product.ProductWithID{
 		Product: &product.ProductMsg{},
