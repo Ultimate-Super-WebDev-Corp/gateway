@@ -37,6 +37,7 @@ services:
     build: ./.docker/logstash
     volumes:
       - ./.docker/logstash/postgres-jdbc-input.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./.docker/logstash/product_mapping.json:/usr/share/logstash/product_mapping.json
     environment:
       LOGSTASH_JDBC_URL: jdbc:postgresql://postgres:5432/gateway
       LOGSTASH_JDBC_USERNAME: gateway
