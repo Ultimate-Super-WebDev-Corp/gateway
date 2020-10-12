@@ -42,13 +42,13 @@ func NewReview(dep Dependences) error {
 		return errors.WithStack(err)
 	}
 
-	c := &Review{
+	r := &Review{
 		gatewayDB:        gatewayDB,
 		statementBuilder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 		customerCli:      dep.CustomerCli,
 	}
 
-	review.RegisterReviewServer(dep.Registrar, c)
+	review.RegisterReviewServer(dep.Registrar, r)
 
 	return nil
 }

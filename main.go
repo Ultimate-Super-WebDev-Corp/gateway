@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/catalog"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/customer"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/file"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/services/product"
@@ -46,6 +47,13 @@ func main() {
 	err = review.NewReview(review.Dependences{
 		Registrar:   srv.RpcServer,
 		CustomerCli: customerCli,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = catalog.NewCatalog(catalog.Dependences{
+		Registrar: srv.RpcServer,
 	})
 	if err != nil {
 		panic(err)

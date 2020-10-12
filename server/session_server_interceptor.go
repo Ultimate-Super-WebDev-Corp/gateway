@@ -9,8 +9,6 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-const mdToken = "token"
-
 func (s Server) UnarySessionServerInterceptor(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -24,13 +22,15 @@ func (s Server) UnarySessionServerInterceptor(ctx context.Context, req interface
 	ctx = sessionToCtx(ctx, session)
 
 	defer func() {
-		respToken, err := s.makeSessionToken(ctx)
-		if err != nil {
+		respToken, errSession := s.makeSessionToken(ctx)
+		if errSession != nil {
+			err = makeSessionErr(err, errSession)
 			return
 		}
 
-		err = grpc.SendHeader(ctx, metadata.Pairs(mdToken, respToken))
-		if err != nil {
+		errSession = grpc.SendHeader(ctx, metadata.Pairs(mdToken, respToken))
+		if errSession != nil {
+			err = makeSessionErr(err, errSession)
 			return
 		}
 	}()
@@ -66,8 +66,19 @@ func (s Server) StreamSessionServerInterceptor(srv interface{}, ss grpc.ServerSt
 
 	defer func() {
 		wrapped.once.Do(func() {
-			err = wrapped.sendMsg()
+			errSession := wrapped.sendMsg()
+			if errSession != nil {
+				err = makeSessionErr(err, errSession)
+				return
+			}
 		})
 	}()
 	return handler(srv, wrapped)
+}
+
+func makeSessionErr(err error, errSession error) error {
+	if err == nil {
+		return NewErrServer(codes.Internal, errors.WithStack(errSession))
+	}
+	return errors.Wrap(err, errSession.Error())
 }

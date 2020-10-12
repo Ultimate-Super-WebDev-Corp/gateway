@@ -14,6 +14,8 @@ import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/model"
 )
 
+const mdToken = "token"
+
 type sessionClaims struct {
 	jwt.StandardClaims
 	model.Session

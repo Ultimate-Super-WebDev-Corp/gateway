@@ -67,7 +67,7 @@ message RatingWithSource {
   string Source = 4;
 }
 
-enum Rating {
+enum Rating { //todo
   UNDEFINED = 0;
   HALF_STARS = 1;
   ONE_STARS = 2;

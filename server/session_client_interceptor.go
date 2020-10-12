@@ -23,8 +23,9 @@ func (s Server) UnarySessionClientInterceptor(ctx context.Context, method string
 	opts = append(opts, grpc.Header(&header))
 
 	defer func() {
-		session, err := s.getSession(header)
-		if err != nil {
+		session, errSession := s.getSession(header)
+		if errSession != nil {
+			err = makeSessionErr(err, errSession)
 			return
 		}
 		SessionInCtxUpdate(ctx, session)

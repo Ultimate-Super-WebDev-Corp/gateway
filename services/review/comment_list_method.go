@@ -25,7 +25,7 @@ func (r Review) CommentList(_ context.Context, msg *review.CommentListRequest) (
 	defer rows.Close()
 
 	comments := make([]*review.Comment, 0, msg.Limit)
-	nextToken := uint64(0)
+	nextToken := msg.Token
 	for rows.Next() {
 		comment := &review.Comment{}
 		if err := rows.Scan(&nextToken, &comment.Text, &comment.Source,

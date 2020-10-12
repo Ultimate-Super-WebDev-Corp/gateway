@@ -11,30 +11,43 @@ service Catalog {
 
 message SearchRequest {
   Sort Sort = 1;
+  uint64 Token = 2;
+  uint64 Limit = 3;
 }
 
 message SearchResponse {
   repeated Product Products = 1;
+  uint64 NextToken = 2;
 }
 
 message Product {
   uint64 Id = 1;
   string Name = 2;
   string Brand = 3;
+  Rating Rating = 4;
+  uint64 Votes = 5;
 }
 
 message Sort {
   OrderBy OrderBy = 1;
-  Order Order = 2;
+  bool ascending = 2;
 }
 
 enum OrderBy {
-  NO_SORTING = 0;
-  RATING = 1;
-  VOTES = 2;
+  rating = 0;
+  votes = 1;
 }
 
-enum Order {
-  DESC = 0;
-  ASC = 1;
+enum Rating {//todo
+  UNDEFINED = 0;
+  HALF_STARS = 1;
+  ONE_STARS = 2;
+  ONE_AND_HALF_STARS = 3;
+  TWO_STARS = 4;
+  TWO_AND_HALF_STARS = 5;
+  THREE_STARS = 6;
+  THREE_AND_HALF_STARS = 7;
+  FOUR_STARS = 8;
+  FOUR_AND_HALF_STARS = 9;
+  FIVE_STARS = 10;
 }
