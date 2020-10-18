@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
-	"github.com/lib/pq"
 	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -71,24 +69,12 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 	}
 
-	row := p.statementBuilder.
-		Select(fieldId, fieldName, fieldBrand, fieldDescription, fieldImages, fieldCountry).
-		From(objectProduct).
-		Where(squirrel.Eq{
-			fieldId: eRespProduct.Id,
-		}).RunWith(p.gatewayDB).QueryRow()
-
-	resProduct := product.ProductWithID{
-		Product: &product.ProductMsg{},
-	}
-	if err := row.Scan(
-		&resProduct.Id, &resProduct.Product.Name, &resProduct.Product.Brand,
-		&resProduct.Product.Description, pq.Array(&resProduct.Product.Images), &resProduct.Product.Country,
-	); err != nil {
-		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
+	resProduct, err := p.getByID(ctx, eRespProduct.Id)
+	if err != nil {
+		return nil, server.NewErrServer(codes.Internal, err)
 	}
 
-	return &resProduct, nil
+	return resProduct, nil
 }
 
 type eProduct struct {

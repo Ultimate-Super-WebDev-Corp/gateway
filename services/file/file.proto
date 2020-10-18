@@ -1,7 +1,7 @@
 syntax = "proto3";
 package file;
 
-option go_package = "gen/services/file";
+option go_package = "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/file";
 
 import "github.com/mwitkow/go-proto-validators/validator.proto";
 import "google/protobuf/empty.proto";

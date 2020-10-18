@@ -9,6 +9,7 @@ import "google/protobuf/empty.proto";
 service Product {
   rpc SearchByUUIDs (SearchByUUIDsRequest) returns (ProductWithID) {}
   rpc Create (ProductMsg) returns(google.protobuf.Empty) {}
+  rpc GetByID (GetByIDRequest) returns (ProductWithID){}
 }
 
 message SearchByUUIDsRequest {
@@ -26,4 +27,8 @@ message ProductMsg {
 message ProductWithID {
   uint64 Id = 1;
   ProductMsg Product = 2;
+}
+
+message GetByIDRequest {
+  uint64 Id = 1 [(validator.field) = {int_gt : 0}];
 }
