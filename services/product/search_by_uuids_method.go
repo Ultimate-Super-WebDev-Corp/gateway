@@ -32,7 +32,7 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 	for uuid, f := range textRecognitionFutures {
 		t, err := f.get()
 		if err != nil {
-			logger.Warn(err.Error(), zap.String("uuid", uuid))
+			logger.Warn("text recognition future error", zap.String("uuid", uuid), zap.Error(err))
 			continue
 		}
 		texts = append(texts, t)

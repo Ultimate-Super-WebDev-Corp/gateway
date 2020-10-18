@@ -1,6 +1,6 @@
 generate:
 	rm -rf ./gen
-	find ./services -type f -iname "*.proto" -exec \
+	cd ${GOPATH} && find ./github.com/Ultimate-Super-WebDev-Corp/gateway/services -type f -iname "*.proto" -exec \
 	protoc --proto_path=${GOPATH}/src --proto_path=./ --go_out=plugins=grpc:./ --govalidators_out=. {} \;
 
 test:

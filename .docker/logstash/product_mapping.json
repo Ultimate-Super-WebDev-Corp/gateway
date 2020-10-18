@@ -6,13 +6,18 @@
   "mappings": {
     "properties": {
       "brand": {
-        "type": "keyword"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       },
       "id": {
         "type": "long"
       },
       "name": {
-        "type": "keyword"
+        "type": "text"
       },
       "rating": {
         "type": "long"

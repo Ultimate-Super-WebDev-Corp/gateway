@@ -1,9 +1,10 @@
 syntax = "proto3";
 package catalog;
 
-option go_package = "gen/services/catalog";
+option go_package = "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/catalog";
 
 import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "github.com/Ultimate-Super-WebDev-Corp/gateway/services/review/review.proto";
 
 service Catalog {
     rpc Search (SearchRequest) returns (SearchResponse){}
@@ -11,21 +12,24 @@ service Catalog {
 
 message SearchRequest {
   Sort Sort = 1;
-  uint64 Token = 2;
-  uint64 Limit = 3;
+  repeated Filter Filter = 2;
+  uint64 Token = 3;
+  uint64 Limit = 4;
 }
 
 message SearchResponse {
   repeated Product Products = 1;
-  uint64 NextToken = 2;
+  repeated Filter Filter = 2;
+  uint64 NextToken = 3;
 }
 
-message Product {
+message Product { //todo generate easyjson
   uint64 Id = 1;
   string Name = 2;
   string Brand = 3;
-  Rating Rating = 4;
+  review.Rating Rating = 4;
   uint64 Votes = 5;
+  repeated string Images = 6;
 }
 
 message Sort {
@@ -33,21 +37,12 @@ message Sort {
   bool ascending = 2;
 }
 
+message Filter {
+    string Field = 1;
+    repeated string List = 2;
+}
+
 enum OrderBy {
   rating = 0;
   votes = 1;
-}
-
-enum Rating {//todo
-  UNDEFINED = 0;
-  HALF_STARS = 1;
-  ONE_STARS = 2;
-  ONE_AND_HALF_STARS = 3;
-  TWO_STARS = 4;
-  TWO_AND_HALF_STARS = 5;
-  THREE_STARS = 6;
-  THREE_AND_HALF_STARS = 7;
-  FOUR_STARS = 8;
-  FOUR_AND_HALF_STARS = 9;
-  FIVE_STARS = 10;
 }

@@ -80,5 +80,5 @@ func makeSessionErr(err error, errSession error) error {
 	if err == nil {
 		return NewErrServer(codes.Internal, errors.WithStack(errSession))
 	}
-	return errors.Wrap(err, errSession.Error())
+	return err
 }

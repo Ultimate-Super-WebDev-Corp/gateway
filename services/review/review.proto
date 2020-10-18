@@ -1,7 +1,7 @@
 syntax = "proto3";
 package review;
 
-option go_package = "gen/services/review";
+option go_package = "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/review";
 
 import "google/protobuf/empty.proto";
 import "github.com/mwitkow/go-proto-validators/validator.proto";
@@ -67,7 +67,7 @@ message RatingWithSource {
   string Source = 4;
 }
 
-enum Rating { //todo
+enum Rating {
   UNDEFINED = 0;
   HALF_STARS = 1;
   ONE_STARS = 2;
