@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/catalog"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/product"
 )
 
 func TestCatalogFlow(t *testing.T) {
@@ -20,14 +20,14 @@ func TestCatalogFlow(t *testing.T) {
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	assert.NoError(t, err)
 	defer conn.Close()
-	catalogCli := catalog.NewCatalogClient(conn)
+	productCli := product.NewProductClient(conn)
 
-	searchResp, err := catalogCli.Search(ctx, &catalog.SearchRequest{
-		Sort: &catalog.Sort{
+	searchResp, err := productCli.Catalog(ctx, &product.CatalogRequest{
+		Sort: &product.Sort{
 			OrderBy:   0,
 			Ascending: false,
 		},
-		Filter: []*catalog.Filter{
+		Filter: []*product.Filter{
 			{
 				Field: "brand",
 				List:  []string{"Biolage"},

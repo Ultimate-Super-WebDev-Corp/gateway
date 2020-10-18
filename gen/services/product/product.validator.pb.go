@@ -9,6 +9,7 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	_ "github.com/mwitkow/go-proto-validators"
 	_ "github.com/golang/protobuf/ptypes/empty"
+	_ "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/review"
 	github_com_mwitkow_go_proto_validators "github.com/mwitkow/go-proto-validators"
 )
 
@@ -47,5 +48,46 @@ func (this *GetByIDRequest) Validate() error {
 	if !(this.Id > 0) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Id", fmt.Errorf(`value '%v' must be greater than '0'`, this.Id))
 	}
+	return nil
+}
+func (this *CatalogRequest) Validate() error {
+	if this.Sort != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Sort); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Sort", err)
+		}
+	}
+	for _, item := range this.Filter {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Filter", err)
+			}
+		}
+	}
+	return nil
+}
+func (this *Sort) Validate() error {
+	return nil
+}
+func (this *Filter) Validate() error {
+	return nil
+}
+func (this *CatalogResponse) Validate() error {
+	for _, item := range this.Products {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Products", err)
+			}
+		}
+	}
+	for _, item := range this.Filter {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Filter", err)
+			}
+		}
+	}
+	return nil
+}
+func (this *CatalogProduct) Validate() error {
 	return nil
 }

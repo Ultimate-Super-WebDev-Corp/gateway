@@ -1,4 +1,4 @@
-package catalog
+package product
 
 import (
 	"context"
@@ -10,28 +10,28 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/catalog"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/product"
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
-func (c Catalog) Search(ctx context.Context, msg *catalog.SearchRequest) (*catalog.SearchResponse, error) {
+func (p Product) Catalog(ctx context.Context, msg *product.CatalogRequest) (*product.CatalogResponse, error) {
 	qMust := make([]elastic.Query, 0, len(msg.Filter)+1)
 	qMust = append(qMust, elastic.MatchAllQuery{})
 	for _, f := range msg.Filter {
 		qMust = append(
 			qMust,
-			elastic.NewTermsQuery(getElasticFilterField(f.Field), stringArrayToInterfaceArray(f.List)...),
+			elastic.NewTermsQuery(getEFilterField(f.Field), stringArrayToInterfaceArray(f.List)...),
 		)
 	}
 
 	if msg.Sort == nil {
-		msg.Sort = &catalog.Sort{}
+		msg.Sort = &product.Sort{}
 	}
-	searchReq := c.elasticCli.Search(objectProduct).
+	searchReq := p.elasticCli.Search(objectProduct).
 		Query(elastic.NewBoolQuery().Must(qMust...)).
 		From(int(msg.Token)).
 		Size(int(msg.Limit)).
-		Sort(catalog.OrderBy_name[int32(msg.Sort.OrderBy)], msg.Sort.Ascending).
+		Sort(product.OrderBy_name[int32(msg.Sort.OrderBy)], msg.Sort.Ascending).
 		Sort(fieldId, true)
 
 	for _, f := range filtersList {
@@ -44,15 +44,15 @@ func (c Catalog) Search(ctx context.Context, msg *catalog.SearchRequest) (*catal
 	}
 
 	if searchRes.Hits == nil || len(searchRes.Hits.Hits) == 0 {
-		return &catalog.SearchResponse{
-			Products:  []*catalog.Product{},
+		return &product.CatalogResponse{
+			Products:  []*product.CatalogProduct{},
 			NextToken: msg.Token,
 		}, nil
 	}
 
-	products := make([]*catalog.Product, 0, len(searchRes.Hits.Hits))
+	products := make([]*product.CatalogProduct, 0, len(searchRes.Hits.Hits))
 	for _, h := range searchRes.Hits.Hits {
-		p := catalog.Product{}
+		p := product.CatalogProduct{}
 		if err := json.Unmarshal(h.Source, &p); err != nil {
 			ctxzap.Extract(ctx).Error("invalid product", zap.Error(err))
 			continue
@@ -60,7 +60,7 @@ func (c Catalog) Search(ctx context.Context, msg *catalog.SearchRequest) (*catal
 		products = append(products, &p)
 	}
 
-	filters := make([]*catalog.Filter, 0, len(filtersList))
+	filters := make([]*product.Filter, 0, len(filtersList))
 	for _, f := range filtersList {
 		aggRes, ok := searchRes.Aggregations.Filters(f.name)
 		if !ok {
@@ -70,13 +70,13 @@ func (c Catalog) Search(ctx context.Context, msg *catalog.SearchRequest) (*catal
 		for _, b := range aggRes.Buckets {
 			list = append(list, b.Key.(string))
 		}
-		filters = append(filters, &catalog.Filter{
+		filters = append(filters, &product.Filter{
 			Field: f.name,
 			List:  list,
 		})
 	}
 
-	return &catalog.SearchResponse{
+	return &product.CatalogResponse{
 		Products:  products,
 		Filter:    filters,
 		NextToken: msg.Token + uint64(len(searchRes.Hits.Hits)),

@@ -13,4 +13,6 @@ const (
 
 	eProductSize      = 1
 	eProductFuzziness = "2"
+
+	eFilterFieldBrand = "brand.keyword"
 )

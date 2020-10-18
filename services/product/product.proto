@@ -5,11 +5,13 @@ option go_package = "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/
 
 import "github.com/mwitkow/go-proto-validators/validator.proto";
 import "google/protobuf/empty.proto";
+import "github.com/Ultimate-Super-WebDev-Corp/gateway/services/review/review.proto";
 
 service Product {
   rpc SearchByUUIDs (SearchByUUIDsRequest) returns (ProductWithID) {}
   rpc Create (ProductMsg) returns(google.protobuf.Empty) {}
   rpc GetByID (GetByIDRequest) returns (ProductWithID){}
+  rpc Catalog (CatalogRequest) returns (CatalogResponse){}
 }
 
 message SearchByUUIDsRequest {
@@ -31,4 +33,42 @@ message ProductWithID {
 
 message GetByIDRequest {
   uint64 Id = 1 [(validator.field) = {int_gt : 0}];
+}
+
+message CatalogRequest {
+  Sort Sort = 1;
+  repeated Filter Filter = 2;
+  uint64 Token = 3;
+  uint64 Limit = 4;
+}
+
+message Sort {
+  OrderBy OrderBy = 1;
+  bool Ascending = 2;
+}
+
+message Filter {
+  string Field = 1;
+  repeated string List = 2;
+}
+
+enum OrderBy {
+  rating = 0;
+  votes = 1;
+}
+
+message CatalogResponse {
+  repeated CatalogProduct Products = 1;
+  repeated Filter Filter = 2;
+  uint64 NextToken = 3;
+}
+
+
+message CatalogProduct {
+  uint64 Id = 1;
+  string Name = 2;
+  string Brand = 3;
+  review.Rating Rating = 4;
+  uint64 Votes = 5;
+  repeated string Images = 6;
 }
