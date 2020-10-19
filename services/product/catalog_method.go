@@ -37,15 +37,6 @@ func (p Product) Catalog(ctx context.Context, msg *product.CatalogRequest) (*pro
 	}, nil
 }
 
-func stringArrayToInterfaceArray(a []string) []interface{} {
-	r := make([]interface{}, 0, len(a))
-	for _, v := range a {
-		r = append(r, v)
-	}
-
-	return r
-}
-
 func applySorts(searchReq *elastic.SearchService, msg *product.CatalogRequest) *elastic.SearchService {
 	uniqueSorts := map[string]*product.Sort{}
 	for _, s := range msg.Sorts {
@@ -179,4 +170,13 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 		}
 	}
 	return filters
+}
+
+func stringArrayToInterfaceArray(a []string) []interface{} {
+	r := make([]interface{}, 0, len(a))
+	for _, v := range a {
+		r = append(r, v)
+	}
+
+	return r
 }
