@@ -1,16 +1,24 @@
 package product
 
-import "github.com/olivere/elastic/v7"
+import (
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/product"
+)
 
-type filterList struct {
-	name        string
-	aggregation elastic.Aggregation
-}
-
-var filtersList = []filterList{
+var dictFilters = []product.Filter{
 	{
-		name:        fieldBrand,
-		aggregation: elastic.NewTermsAggregation().Field(getEFilterField(fieldBrand)),
+		Field: fieldBrand,
+		Name:  "Бренд",
+		Value: &product.Filter_ListFilter{},
+	},
+	{
+		Field: fieldRating,
+		Name:  "Рейтинг",
+		Value: &product.Filter_RangeFilter{},
+	},
+	{
+		Field: fieldVotes,
+		Name:  "Количество отзывов",
+		Value: &product.Filter_RangeFilter{},
 	},
 }
 
@@ -24,4 +32,12 @@ func getEFilterField(field string) string {
 		return elasticField
 	}
 	return field
+}
+
+func makeFilterRangeMinName(filterName string) string {
+	return "min_" + filterName
+}
+
+func makeFilterRangeMaxName(filterName string) string {
+	return "max_" + filterName
 }

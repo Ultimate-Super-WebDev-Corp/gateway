@@ -10,6 +10,8 @@ const (
 	fieldImages      = "images"
 	fieldCountry     = "country"
 	fieldUpdatedAt   = "updated_at"
+	fieldRating      = "rating"
+	fieldVotes       = "votes"
 
 	eProductSize      = 1
 	eProductFuzziness = "2"

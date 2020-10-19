@@ -23,14 +23,21 @@ func TestCatalogFlow(t *testing.T) {
 	productCli := product.NewProductClient(conn)
 
 	searchResp, err := productCli.Catalog(ctx, &product.CatalogRequest{
-		Sort: &product.Sort{
-			OrderBy:   0,
-			Ascending: false,
-		},
-		Filter: []*product.Filter{
+		Filters: []*product.Filter{
 			{
 				Field: "brand",
-				List:  []string{"Biolage"},
+				Value: &product.Filter_ListFilter{
+					ListFilter: &product.ListFilter{
+						List: []string{"MAKEUP"},
+					},
+				},
+			},
+			{
+				Field: "rating",
+				Value: &product.Filter_RangeFilter{RangeFilter: &product.RangeFilter{
+					Min: 4,
+					Max: 6,
+				}},
 			},
 		},
 		Token: 0,

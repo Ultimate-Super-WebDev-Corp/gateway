@@ -36,20 +36,34 @@ message GetByIDRequest {
 }
 
 message CatalogRequest {
-  Sort Sort = 1;
-  repeated Filter Filter = 2;
+  repeated Sort Sorts = 1;
+  repeated Filter Filters = 2;
   uint64 Token = 3;
   uint64 Limit = 4;
 }
 
 message Sort {
-  OrderBy OrderBy = 1;
-  bool Ascending = 2;
+  string Field = 1;
+  string Name = 2;
+  bool Ascending = 3;
 }
 
 message Filter {
   string Field = 1;
-  repeated string List = 2;
+  string Name = 2;
+  oneof Value {
+    ListFilter ListFilter = 4;
+    RangeFilter RangeFilter = 5;
+  }
+}
+
+message ListFilter {
+  repeated string List = 1;
+}
+
+message RangeFilter {
+  int64 Min = 1;
+  int64 Max = 2;
 }
 
 enum OrderBy {
@@ -59,8 +73,9 @@ enum OrderBy {
 
 message CatalogResponse {
   repeated CatalogProduct Products = 1;
-  repeated Filter Filter = 2;
-  uint64 NextToken = 3;
+  repeated Filter Filters = 2;
+  repeated Sort Sorts = 3;
+  uint64 NextToken = 4;
 }
 
 

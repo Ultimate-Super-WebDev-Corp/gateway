@@ -51,15 +51,17 @@ func (this *GetByIDRequest) Validate() error {
 	return nil
 }
 func (this *CatalogRequest) Validate() error {
-	if this.Sort != nil {
-		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Sort); err != nil {
-			return github_com_mwitkow_go_proto_validators.FieldError("Sort", err)
-		}
-	}
-	for _, item := range this.Filter {
+	for _, item := range this.Sorts {
 		if item != nil {
 			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
-				return github_com_mwitkow_go_proto_validators.FieldError("Filter", err)
+				return github_com_mwitkow_go_proto_validators.FieldError("Sorts", err)
+			}
+		}
+	}
+	for _, item := range this.Filters {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Filters", err)
 			}
 		}
 	}
@@ -69,6 +71,26 @@ func (this *Sort) Validate() error {
 	return nil
 }
 func (this *Filter) Validate() error {
+	if oneOfNester, ok := this.GetValue().(*Filter_ListFilter); ok {
+		if oneOfNester.ListFilter != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(oneOfNester.ListFilter); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("ListFilter", err)
+			}
+		}
+	}
+	if oneOfNester, ok := this.GetValue().(*Filter_RangeFilter); ok {
+		if oneOfNester.RangeFilter != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(oneOfNester.RangeFilter); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("RangeFilter", err)
+			}
+		}
+	}
+	return nil
+}
+func (this *ListFilter) Validate() error {
+	return nil
+}
+func (this *RangeFilter) Validate() error {
 	return nil
 }
 func (this *CatalogResponse) Validate() error {
@@ -79,10 +101,17 @@ func (this *CatalogResponse) Validate() error {
 			}
 		}
 	}
-	for _, item := range this.Filter {
+	for _, item := range this.Filters {
 		if item != nil {
 			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
-				return github_com_mwitkow_go_proto_validators.FieldError("Filter", err)
+				return github_com_mwitkow_go_proto_validators.FieldError("Filters", err)
+			}
+		}
+	}
+	for _, item := range this.Sorts {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Sorts", err)
 			}
 		}
 	}

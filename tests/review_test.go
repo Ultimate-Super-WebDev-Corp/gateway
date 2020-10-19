@@ -58,9 +58,9 @@ func TestReview(t *testing.T) {
 	ctx = metadata.NewOutgoingContext(context.Background(), metadata.Pairs(
 		"token", sessionWithRoot))
 	_, err = reviewCli.CreateRatingFromSource(ctx, &review.CreateRatingFromSourceRequest{
-		ProductId: 1,
+		ProductId: 2,
 		Source:    "b",
-		Rating:    8,
+		Rating:    4,
 		Votes:     60,
 	})
 	assert.NoError(t, err)
