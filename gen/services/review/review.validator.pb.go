@@ -92,6 +92,11 @@ func (this *GetRatingResponse) Validate() error {
 			}
 		}
 	}
+	if this.AggregatedRating != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.AggregatedRating); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("AggregatedRating", err)
+		}
+	}
 	return nil
 }
 func (this *RatingWithSource) Validate() error {

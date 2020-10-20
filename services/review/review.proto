@@ -59,6 +59,7 @@ message GetRatingRequest {
 
 message GetRatingResponse {
   repeated RatingWithSource Ratings = 1;
+  RatingWithSource  AggregatedRating = 2;
 }
 
 message RatingWithSource {

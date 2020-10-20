@@ -24,14 +24,20 @@ func (r Review) GetRating(_ context.Context, msg *review.GetRatingRequest) (*rev
 	defer rows.Close()
 
 	ratings := make([]*review.RatingWithSource, 0, 10)
+	var aggregatedRating *review.RatingWithSource
 	for rows.Next() {
 		rating := &review.RatingWithSource{}
 		if err := rows.Scan(&rating.Rating, &rating.Source, &rating.Votes); err != nil {
 			return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
 		}
-		ratings = append(ratings, rating)
+		if rating.Source == sourceAggregated {
+			aggregatedRating = rating
+		} else {
+			ratings = append(ratings, rating)
+		}
 	}
 	return &review.GetRatingResponse{
-		Ratings: ratings,
+		Ratings:          ratings,
+		AggregatedRating: aggregatedRating,
 	}, nil
 }
