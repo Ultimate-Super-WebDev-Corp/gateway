@@ -13,7 +13,7 @@ import (
 	"github.com/Ultimate-Super-WebDev-Corp/gateway/server"
 )
 
-const oneFilePart = 1024 * 1024 // 1 MB
+const oneFilePart = 3 * 1024 * 1024 // 3 MB
 
 func (fu File) GetFile(msg *file.FileUUID, stream file.File_GetFileServer) error {
 	partition, err := getPartition(msg.UUID)
