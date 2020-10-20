@@ -17,8 +17,7 @@ import (
 func (p Product) Catalog(ctx context.Context, msg *product.CatalogRequest) (*product.CatalogResponse, error) {
 	searchReq := p.elasticCli.Search(objectProduct).
 		From(int(msg.Token)).
-		Size(int(msg.Limit)).
-		Sort(fieldId, true)
+		Size(int(msg.Limit))
 
 	searchReq = applySorts(searchReq, msg)
 	searchReq = applyFilters(searchReq, msg)
@@ -39,18 +38,39 @@ func (p Product) Catalog(ctx context.Context, msg *product.CatalogRequest) (*pro
 }
 
 func applySorts(searchReq *elastic.SearchService, msg *product.CatalogRequest) *elastic.SearchService {
-	uniqueSorts := map[string]*product.Sort{}
+	searchReq = searchReq.Sort(fieldScore, false)
+
+	mapUniqueSorts := map[string]struct{}{}
+	uniqueSorts := make([]string, 0, len(msg.Sorts))
 	for _, s := range msg.Sorts {
-		uniqueSorts[s.Id] = s
+		if _, ok := mapUniqueSorts[s.Id]; ok {
+			continue
+		}
+		mapUniqueSorts[s.Id] = struct{}{}
+		uniqueSorts = append(uniqueSorts, s.Id)
 	}
 
+	clearSorts := map[string]*product.Sort{}
 	for _, s := range dictSorts {
-		us, ok := uniqueSorts[s.Id]
+		if _, ok := mapUniqueSorts[s.Id]; !ok {
+			continue
+		}
+		clearSorts[s.Id] = s
+	}
+
+	for _, id := range uniqueSorts {
+		cs, ok := clearSorts[id]
 		if !ok {
 			continue
 		}
-		searchReq = searchReq.Sort(us.Id, us.Ascending)
+		searchReq = searchReq.Sort(cs.Id, cs.Ascending)
 	}
+
+	if len(clearSorts) == 0 {
+		searchReq = searchReq.Sort(defaultSort.Id, defaultSort.Ascending)
+	}
+
+	searchReq = searchReq.Sort(fieldId, true)
 	return searchReq
 }
 
@@ -86,6 +106,10 @@ func applyFilters(searchReq *elastic.SearchService, msg *product.CatalogRequest)
 			qMust,
 			elastic.NewMatchQuery(getEFilterField(fieldCategories), msg.CategoryId),
 		)
+	}
+
+	if msg.TextSearch != "" {
+		qMust = append(qMust, makeTextSearchQuery(msg.TextSearch))
 	}
 
 	return searchReq.Query(elastic.NewBoolQuery().Must(qMust...))

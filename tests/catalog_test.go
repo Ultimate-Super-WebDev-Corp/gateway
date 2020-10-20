@@ -40,7 +40,7 @@ func TestCatalogFlow(t *testing.T) {
 			//	}},
 			//},
 		},
-		CategoryId: "mask",
+		TextSearch: "Auriga",
 		Token:      0,
 		Limit:      4,
 	})

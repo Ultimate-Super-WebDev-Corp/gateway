@@ -45,16 +45,11 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 		text += " " + t.text
 	}
 
-	elasticQuery := elastic.NewBoolQuery().Should(
-		elastic.NewMatchQuery(fieldBrand, text).Fuzziness(eProductFuzziness),
-		elastic.NewMatchQuery(fieldName, text).Fuzziness(eProductFuzziness),
-	).MinimumNumberShouldMatch(1)
-
 	searchRes, err := p.elasticCli.Search(objectProduct).
 		FetchSourceContext(
 			elastic.NewFetchSourceContext(true).
 				Include(fieldId)).
-		Query(elasticQuery).
+		Query(makeTextSearchQuery(text)).
 		Size(eProductSize).Do(ctx)
 	if err != nil {
 		return nil, server.NewErrServer(codes.Internal, errors.WithStack(err))
@@ -79,4 +74,11 @@ func (p Product) SearchByUUIDs(ctx context.Context, msg *product.SearchByUUIDsRe
 
 type eProduct struct {
 	Id uint64 `json:"id"`
+}
+
+func makeTextSearchQuery(text string) *elastic.BoolQuery {
+	return elastic.NewBoolQuery().Should(
+		elastic.NewMatchQuery(fieldBrand, text).Fuzziness(eProductFuzziness),
+		elastic.NewMatchQuery(fieldName, text).Fuzziness(eProductFuzziness),
+	).MinimumNumberShouldMatch(1)
 }

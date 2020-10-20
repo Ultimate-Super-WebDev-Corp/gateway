@@ -40,8 +40,9 @@ message CatalogRequest {
   repeated Sort Sorts = 1;
   repeated Filter Filters = 2;
   string CategoryId = 3;
-  uint64 Token = 4;
-  uint64 Limit = 5;
+  string TextSearch = 4;
+  uint64 Token = 5;
+  uint64 Limit = 6;
 }
 
 message Sort {

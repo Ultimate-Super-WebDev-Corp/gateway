@@ -13,6 +13,7 @@ const (
 	fieldRating      = "rating"
 	fieldVotes       = "votes"
 	fieldCategories  = "categories"
+	fieldScore       = "_score"
 
 	eProductSize      = 1
 	eProductFuzziness = "2"
