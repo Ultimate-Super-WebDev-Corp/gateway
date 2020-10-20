@@ -24,7 +24,12 @@ func (r Review) GetRating(_ context.Context, msg *review.GetRatingRequest) (*rev
 	defer rows.Close()
 
 	ratings := make([]*review.RatingWithSource, 0, 10)
-	var aggregatedRating *review.RatingWithSource
+	aggregatedRating := &review.RatingWithSource{
+		Rating: review.Rating_UNDEFINED,
+		Votes:  0,
+		Source: sourceAggregated,
+	}
+
 	for rows.Next() {
 		rating := &review.RatingWithSource{}
 		if err := rows.Scan(&rating.Rating, &rating.Source, &rating.Votes); err != nil {

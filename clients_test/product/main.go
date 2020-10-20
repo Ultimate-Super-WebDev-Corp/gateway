@@ -76,7 +76,7 @@ func productInsert() {
 		"token": []string{"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjEiLCJQYXNzd29yZElkIjotMSwiQ3VzdG9tZXJJZCI6MSwiVXBkYXRlZEF0IjoyNjAxMzA3NzMyMzU0MzkxNjAwfQ.AZsSe6JsFD_BAIHuVzCksj00wJJo3rfhJrkmSqjhJjo"},
 	})
 
-	f, err := os.Open("clients_test/product/1551585.json")
+	f, err := os.Open("clients_test/product/1005767.json")
 	_ = err
 	allF, err := ioutil.ReadAll(f)
 	_ = err

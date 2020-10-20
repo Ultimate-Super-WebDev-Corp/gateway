@@ -69,5 +69,5 @@ func TestReview(t *testing.T) {
 		ProductId: 1,
 	})
 	assert.NoError(t, err)
-	assert.Len(t, getRatingResp.Ratings, 4)
+	assert.Len(t, getRatingResp.Ratings, 2)
 }
