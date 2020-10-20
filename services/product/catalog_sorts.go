@@ -10,11 +10,13 @@ var defaultSort = &product.Sort{
 
 var dictSorts = []*product.Sort{
 	{
-		Id:   fieldRating,
-		Name: "по рейтингу",
+		Id:        fieldRating,
+		Name:      "по рейтингу",
+		Ascending: false,
 	},
 	{
-		Id:   fieldVotes,
-		Name: "по количеству отзывов",
+		Id:        fieldVotes,
+		Name:      "по количеству отзывов",
+		Ascending: false,
 	},
 }
