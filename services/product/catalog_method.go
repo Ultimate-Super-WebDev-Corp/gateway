@@ -30,25 +30,26 @@ func (p Product) Catalog(ctx context.Context, msg *product.CatalogRequest) (*pro
 	}
 
 	return &product.CatalogResponse{
-		Products:  buildProducts(ctx, searchRes),
-		Filters:   buildFilters(ctx, searchRes),
-		Sorts:     dictSorts,
-		NextToken: msg.Token + uint64(len(searchRes.Hits.Hits)),
+		Products:   buildProducts(ctx, searchRes),
+		Filters:    buildFilters(ctx, searchRes),
+		Categories: buildCategories(ctx, msg.CategoryId, searchRes),
+		Sorts:      dictSorts,
+		NextToken:  msg.Token + uint64(len(searchRes.Hits.Hits)),
 	}, nil
 }
 
 func applySorts(searchReq *elastic.SearchService, msg *product.CatalogRequest) *elastic.SearchService {
 	uniqueSorts := map[string]*product.Sort{}
 	for _, s := range msg.Sorts {
-		uniqueSorts[s.Field] = s
+		uniqueSorts[s.Id] = s
 	}
 
 	for _, s := range dictSorts {
-		us, ok := uniqueSorts[s.Field]
+		us, ok := uniqueSorts[s.Id]
 		if !ok {
 			continue
 		}
-		searchReq = searchReq.Sort(us.Field, us.Ascending)
+		searchReq = searchReq.Sort(us.Id, us.Ascending)
 	}
 	return searchReq
 }
@@ -58,11 +59,11 @@ func applyFilters(searchReq *elastic.SearchService, msg *product.CatalogRequest)
 	qMust = append(qMust, elastic.MatchAllQuery{})
 	uniqueFilters := map[string]*product.Filter{}
 	for _, f := range msg.Filters {
-		uniqueFilters[f.Field] = f
+		uniqueFilters[f.Id] = f
 	}
 
 	for _, f := range dictFilters {
-		uf, ok := uniqueFilters[f.Field]
+		uf, ok := uniqueFilters[f.Id]
 		if !ok {
 			continue
 		}
@@ -70,14 +71,21 @@ func applyFilters(searchReq *elastic.SearchService, msg *product.CatalogRequest)
 		case *product.Filter_ListFilter:
 			qMust = append(
 				qMust,
-				elastic.NewTermsQuery(getEFilterField(uf.Field), stringArrayToInterfaceArray(v.ListFilter.List)...),
+				elastic.NewTermsQuery(getEFilterField(uf.Id), stringArrayToInterfaceArray(v.ListFilter.List)...),
 			)
 		case *product.Filter_RangeFilter:
 			qMust = append(
 				qMust,
-				elastic.NewRangeQuery(uf.Field).Lte(v.RangeFilter.Max).Gte(v.RangeFilter.Min),
+				elastic.NewRangeQuery(uf.Id).Lte(v.RangeFilter.Max).Gte(v.RangeFilter.Min),
 			)
 		}
+	}
+
+	if msg.CategoryId != "" {
+		qMust = append(
+			qMust,
+			elastic.NewMatchQuery(getEFilterField(fieldCategories), msg.CategoryId),
+		)
 	}
 
 	return searchReq.Query(elastic.NewBoolQuery().Must(qMust...))
@@ -87,12 +95,14 @@ func applyAggregations(searchReq *elastic.SearchService) *elastic.SearchService 
 	for _, f := range dictFilters {
 		switch f.Value.(type) {
 		case *product.Filter_ListFilter:
-			searchReq = searchReq.Aggregation(f.Field, elastic.NewTermsAggregation().Field(getEFilterField(f.Field)))
+			searchReq = searchReq.Aggregation(f.Id, elastic.NewTermsAggregation().Field(getEFilterField(f.Id)))
 		case *product.Filter_RangeFilter:
-			searchReq = searchReq.Aggregation(makeFilterRangeMaxName(f.Field), elastic.NewMaxAggregation().Field(getEFilterField(f.Field)))
-			searchReq = searchReq.Aggregation(makeFilterRangeMinName(f.Field), elastic.NewMinAggregation().Field(getEFilterField(f.Field)))
+			searchReq = searchReq.Aggregation(makeFilterRangeMaxName(f.Id), elastic.NewMaxAggregation().Field(getEFilterField(f.Id)))
+			searchReq = searchReq.Aggregation(makeFilterRangeMinName(f.Id), elastic.NewMinAggregation().Field(getEFilterField(f.Id)))
 		}
 	}
+
+	searchReq = searchReq.Aggregation(fieldCategories, elastic.NewTermsAggregation().Field(getEFilterField(fieldCategories)))
 	return searchReq
 }
 
@@ -119,9 +129,9 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 	for _, f := range dictFilters {
 		switch f.Value.(type) {
 		case *product.Filter_ListFilter:
-			aggRes, ok := searchRes.Aggregations.Filters(f.Field)
+			aggRes, ok := searchRes.Aggregations.Filters(f.Id)
 			if !ok {
-				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Field))
+				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Id))
 				continue
 			}
 			list := make([]string, 0, len(aggRes.Buckets))
@@ -129,8 +139,8 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 				list = append(list, b.Key.(string))
 			}
 			filters = append(filters, &product.Filter{
-				Field: f.Field,
-				Name:  f.Name,
+				Id:   f.Id,
+				Name: f.Name,
 				Value: &product.Filter_ListFilter{
 					ListFilter: &product.ListFilter{
 						List: list,
@@ -138,14 +148,14 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 				},
 			})
 		case *product.Filter_RangeFilter:
-			aggResMax, ok := searchRes.Aggregations.Max(makeFilterRangeMaxName(f.Field))
+			aggResMax, ok := searchRes.Aggregations.Max(makeFilterRangeMaxName(f.Id))
 			if !ok {
-				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Field))
+				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Id))
 				continue
 			}
-			aggResMin, ok := searchRes.Aggregations.Min(makeFilterRangeMinName(f.Field))
+			aggResMin, ok := searchRes.Aggregations.Min(makeFilterRangeMinName(f.Id))
 			if !ok {
-				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Field))
+				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Id))
 				continue
 			}
 			if aggResMax.Value == nil {
@@ -158,8 +168,8 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 			min := int64(*aggResMin.Value)
 
 			filters = append(filters, &product.Filter{
-				Field: f.Field,
-				Name:  f.Name,
+				Id:   f.Id,
+				Name: f.Name,
 				Value: &product.Filter_RangeFilter{
 					RangeFilter: &product.RangeFilter{
 						Min: min,
@@ -170,6 +180,41 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 		}
 	}
 	return filters
+}
+
+func buildCategories(ctx context.Context, categoryId string, searchRes *elastic.SearchResult) []*product.Category {
+	aggRes, ok := searchRes.Aggregations.Filters(fieldCategories)
+	if !ok {
+		ctxzap.Extract(ctx).Warn("categories not found")
+		return []*product.Category{}
+	}
+
+	subtree := getSubtree(categoryId, dictCategoryTree)
+	mapSubtree := map[string]struct{}{}
+	for _, node := range subtree {
+		mapSubtree[node.Id] = struct{}{}
+	}
+
+	mapCategories := map[string]struct{}{}
+	for _, b := range aggRes.Buckets {
+		id := b.Key.(string)
+		if _, ok := mapSubtree[id]; !ok {
+			continue
+		}
+		mapCategories[id] = struct{}{}
+	}
+
+	categories := make([]*product.Category, 0, len(mapCategories))
+	for _, node := range subtree {
+		if _, ok := mapCategories[node.Id]; !ok {
+			continue
+		}
+		categories = append(categories, &product.Category{
+			Id:   node.Id,
+			Name: node.Name,
+		})
+	}
+	return categories
 }
 
 func stringArrayToInterfaceArray(a []string) []interface{} {

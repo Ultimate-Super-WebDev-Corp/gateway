@@ -24,24 +24,25 @@ func TestCatalogFlow(t *testing.T) {
 
 	searchResp, err := productCli.Catalog(ctx, &product.CatalogRequest{
 		Filters: []*product.Filter{
-			{
-				Field: "brand",
-				Value: &product.Filter_ListFilter{
-					ListFilter: &product.ListFilter{
-						List: []string{"MAKEUP"},
-					},
-				},
-			},
-			{
-				Field: "rating",
-				Value: &product.Filter_RangeFilter{RangeFilter: &product.RangeFilter{
-					Min: 4,
-					Max: 6,
-				}},
-			},
+			//{
+			//	Id: "brand",
+			//	Value: &product.Filter_ListFilter{
+			//		ListFilter: &product.ListFilter{
+			//			List: []string{"MAKEUP"},
+			//		},
+			//	},
+			//},
+			//{
+			//	Id: "rating",
+			//	Value: &product.Filter_RangeFilter{RangeFilter: &product.RangeFilter{
+			//		Min: 4,
+			//		Max: 6,
+			//	}},
+			//},
 		},
-		Token: 0,
-		Limit: 4,
+		CategoryId: "mask",
+		Token:      0,
+		Limit:      4,
 	})
 	_, _ = searchResp, err
 

@@ -6,17 +6,17 @@ import (
 
 var dictFilters = []product.Filter{
 	{
-		Field: fieldBrand,
+		Id:    fieldBrand,
 		Name:  "Бренд",
 		Value: &product.Filter_ListFilter{},
 	},
 	{
-		Field: fieldRating,
+		Id:    fieldRating,
 		Name:  "Рейтинг",
 		Value: &product.Filter_RangeFilter{},
 	},
 	{
-		Field: fieldVotes,
+		Id:    fieldVotes,
 		Name:  "Количество отзывов",
 		Value: &product.Filter_RangeFilter{},
 	},

@@ -22,8 +22,9 @@ message ProductMsg {
   string Name = 1 [(validator.field) = {string_not_empty: true}];
   string Brand = 2 [(validator.field) = {string_not_empty: true}];
   string Description = 3 [(validator.field) = {string_not_empty: true}];
-  repeated string Images = 4;
-  string country = 5;
+  repeated string CategoryIds = 4;
+  repeated string Images = 5;
+  string country = 6;
 }
 
 message ProductWithID {
@@ -38,18 +39,19 @@ message GetByIDRequest {
 message CatalogRequest {
   repeated Sort Sorts = 1;
   repeated Filter Filters = 2;
-  uint64 Token = 3;
-  uint64 Limit = 4;
+  string CategoryId = 3;
+  uint64 Token = 4;
+  uint64 Limit = 5;
 }
 
 message Sort {
-  string Field = 1;
+  string Id = 1;
   string Name = 2;
   bool Ascending = 3;
 }
 
 message Filter {
-  string Field = 1;
+  string Id = 1;
   string Name = 2;
   oneof Value {
     ListFilter ListFilter = 4;
@@ -66,16 +68,12 @@ message RangeFilter {
   int64 Max = 2;
 }
 
-enum OrderBy {
-  rating = 0;
-  votes = 1;
-}
-
 message CatalogResponse {
   repeated CatalogProduct Products = 1;
   repeated Filter Filters = 2;
-  repeated Sort Sorts = 3;
-  uint64 NextToken = 4;
+  repeated Category Categories = 3;
+  repeated Sort Sorts = 4;
+  uint64 NextToken = 5;
 }
 
 
@@ -86,4 +84,10 @@ message CatalogProduct {
   review.Rating Rating = 4;
   uint64 Votes = 5;
   repeated string Images = 6;
+}
+
+message Category {
+  string Id = 1;
+  string Name = 2;
+  repeated Category Categories = 3;
 }

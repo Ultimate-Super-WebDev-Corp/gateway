@@ -54,6 +54,16 @@ type aDermaPrd struct {
 	Brand       string   `json:"brand"`
 }
 
+var cat = [][]string{
+	{"face"},
+	{"hair"},
+	{"face", "mask"},
+	{"hair", "hair_conditioner"},
+	{"face", "mask"},
+	{"hair", "shampoo"},
+	{"face", "cream"},
+}
+
 func productInsert() {
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
@@ -76,13 +86,14 @@ func productInsert() {
 	err = json.Unmarshal(allF, &aDerms)
 	fmt.Println(err)
 	for _, derm := range aDerms {
-		for _, d := range derm {
+		for i, d := range derm {
 			_, err := c.Create(ctx, &product.ProductMsg{
 				Name:        d.Name,
 				Brand:       d.Brand,
 				Description: d.Description,
 				Images:      d.Images,
 				Country:     d.Country,
+				CategoryIds: cat[i%(len(cat))],
 			})
 			if err != nil {
 				fmt.Println(err)

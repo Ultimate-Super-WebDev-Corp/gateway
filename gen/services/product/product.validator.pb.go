@@ -7,9 +7,9 @@ import (
 	fmt "fmt"
 	math "math"
 	proto "github.com/golang/protobuf/proto"
+	_ "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/review"
 	_ "github.com/mwitkow/go-proto-validators"
 	_ "github.com/golang/protobuf/ptypes/empty"
-	_ "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/review"
 	github_com_mwitkow_go_proto_validators "github.com/mwitkow/go-proto-validators"
 )
 
@@ -108,6 +108,13 @@ func (this *CatalogResponse) Validate() error {
 			}
 		}
 	}
+	for _, item := range this.Categories {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Categories", err)
+			}
+		}
+	}
 	for _, item := range this.Sorts {
 		if item != nil {
 			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
@@ -118,5 +125,15 @@ func (this *CatalogResponse) Validate() error {
 	return nil
 }
 func (this *CatalogProduct) Validate() error {
+	return nil
+}
+func (this *Category) Validate() error {
+	for _, item := range this.Categories {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Categories", err)
+			}
+		}
+	}
 	return nil
 }

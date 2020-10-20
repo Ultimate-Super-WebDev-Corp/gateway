@@ -24,6 +24,12 @@
       },
       "votes": {
         "type": "long"
+      },
+      "images": {
+        "type": "keyword"
+      },
+      "categories": {
+        "type": "keyword"
       }
     }
   }

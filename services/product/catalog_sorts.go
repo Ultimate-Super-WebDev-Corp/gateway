@@ -4,11 +4,11 @@ import "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/product"
 
 var dictSorts = []*product.Sort{
 	{
-		Field: fieldRating,
-		Name:  "по рейтингу",
+		Id:   fieldRating,
+		Name: "по рейтингу",
 	},
 	{
-		Field: fieldVotes,
-		Name:  "по количеству отзывов",
+		Id:   fieldVotes,
+		Name: "по количеству отзывов",
 	},
 }
