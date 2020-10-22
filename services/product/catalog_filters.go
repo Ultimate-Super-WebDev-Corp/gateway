@@ -13,13 +13,18 @@ var dictFilters = []product.Filter{
 	{
 		Id:    fieldRating,
 		Name:  "Рейтинг",
-		Value: &product.Filter_RangeFilter{},
+		Value: &product.Filter_SwitchFilter{},
 	},
 	{
 		Id:    fieldVotes,
 		Name:  "Количество отзывов",
 		Value: &product.Filter_RangeFilter{},
 	},
+}
+
+var dictAggregationMissingValue = map[string]interface{}{
+	fieldVotes:  0,
+	fieldRating: 0,
 }
 
 var fieldToEFilterField = map[string]string{

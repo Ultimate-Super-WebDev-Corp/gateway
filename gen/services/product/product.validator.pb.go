@@ -85,9 +85,19 @@ func (this *Filter) Validate() error {
 			}
 		}
 	}
+	if oneOfNester, ok := this.GetValue().(*Filter_SwitchFilter); ok {
+		if oneOfNester.SwitchFilter != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(oneOfNester.SwitchFilter); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("SwitchFilter", err)
+			}
+		}
+	}
 	return nil
 }
 func (this *ListFilter) Validate() error {
+	return nil
+}
+func (this *SwitchFilter) Validate() error {
 	return nil
 }
 func (this *RangeFilter) Validate() error {

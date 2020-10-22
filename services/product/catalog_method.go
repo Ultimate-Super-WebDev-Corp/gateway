@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"encoding/json"
+	"sort"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/olivere/elastic/v7"
@@ -20,7 +21,7 @@ func (p Product) Catalog(ctx context.Context, msg *product.CatalogRequest) (*pro
 		Size(int(msg.Limit))
 
 	searchReq = applySorts(searchReq, msg)
-	searchReq = applyFilters(searchReq, msg)
+	searchReq = applyFilters(ctx, searchReq, msg)
 	searchReq = applyAggregations(searchReq)
 
 	searchRes, err := searchReq.Do(ctx)
@@ -74,7 +75,7 @@ func applySorts(searchReq *elastic.SearchService, msg *product.CatalogRequest) *
 	return searchReq
 }
 
-func applyFilters(searchReq *elastic.SearchService, msg *product.CatalogRequest) *elastic.SearchService {
+func applyFilters(ctx context.Context, searchReq *elastic.SearchService, msg *product.CatalogRequest) *elastic.SearchService {
 	qMust := make([]elastic.Query, 0, len(msg.Filters)+1)
 	qMust = append(qMust, elastic.MatchAllQuery{})
 	uniqueFilters := map[string]*product.Filter{}
@@ -91,12 +92,22 @@ func applyFilters(searchReq *elastic.SearchService, msg *product.CatalogRequest)
 		case *product.Filter_ListFilter:
 			qMust = append(
 				qMust,
-				elastic.NewTermsQuery(getEFilterField(uf.Id), stringArrayToInterfaceArray(v.ListFilter.List)...),
+				elastic.NewTermsQuery(getEFilterField(uf.Id), stringArrayToInterfaceArray(v.ListFilter.Items)...),
 			)
 		case *product.Filter_RangeFilter:
 			qMust = append(
 				qMust,
 				elastic.NewRangeQuery(uf.Id).Lte(v.RangeFilter.Max).Gte(v.RangeFilter.Min),
+			)
+		case *product.Filter_SwitchFilter:
+			if len(v.SwitchFilter.Switches) != 1 {
+				ctxzap.Extract(ctx).Warn("len(SwitchFilter.Switches) != 1",
+					zap.Any("switches", v.SwitchFilter.Switches))
+				break
+			}
+			qMust = append(
+				qMust,
+				dictSwitchFilter.getEQuery(uf.Id, v.SwitchFilter.Switches[0]),
 			)
 		}
 	}
@@ -119,10 +130,16 @@ func applyAggregations(searchReq *elastic.SearchService) *elastic.SearchService 
 	for _, f := range dictFilters {
 		switch f.Value.(type) {
 		case *product.Filter_ListFilter:
-			searchReq = searchReq.Aggregation(f.Id, elastic.NewTermsAggregation().Field(getEFilterField(f.Id)))
+			searchReq = searchReq.Aggregation(f.Id,
+				elastic.NewTermsAggregation().Field(getEFilterField(f.Id)).Missing(dictAggregationMissingValue[f.Id]))
 		case *product.Filter_RangeFilter:
-			searchReq = searchReq.Aggregation(makeFilterRangeMaxName(f.Id), elastic.NewMaxAggregation().Field(getEFilterField(f.Id)))
-			searchReq = searchReq.Aggregation(makeFilterRangeMinName(f.Id), elastic.NewMinAggregation().Field(getEFilterField(f.Id)))
+			searchReq = searchReq.Aggregation(makeFilterRangeMaxName(f.Id),
+				elastic.NewMaxAggregation().Field(getEFilterField(f.Id)).Missing(dictAggregationMissingValue[f.Id]))
+			searchReq = searchReq.Aggregation(makeFilterRangeMinName(f.Id),
+				elastic.NewMinAggregation().Field(getEFilterField(f.Id)).Missing(dictAggregationMissingValue[f.Id]))
+		case *product.Filter_SwitchFilter:
+			searchReq = searchReq.Aggregation(f.Id,
+				elastic.NewTermsAggregation().Field(getEFilterField(f.Id)).Missing(dictAggregationMissingValue[f.Id]))
 		}
 	}
 
@@ -158,16 +175,18 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Id))
 				continue
 			}
-			list := make([]string, 0, len(aggRes.Buckets))
+			items := make([]string, 0, len(aggRes.Buckets))
 			for _, b := range aggRes.Buckets {
-				list = append(list, b.Key.(string))
+				items = append(items, b.Key.(string))
 			}
+
+			sort.Strings(items)
 			filters = append(filters, &product.Filter{
 				Id:   f.Id,
 				Name: f.Name,
 				Value: &product.Filter_ListFilter{
 					ListFilter: &product.ListFilter{
-						List: list,
+						Items: items,
 					},
 				},
 			})
@@ -198,6 +217,27 @@ func buildFilters(ctx context.Context, searchRes *elastic.SearchResult) []*produ
 					RangeFilter: &product.RangeFilter{
 						Min: min,
 						Max: max,
+					},
+				},
+			})
+		case *product.Filter_SwitchFilter:
+			aggRes, ok := searchRes.Aggregations.Filters(f.Id)
+			if !ok {
+				ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", f.Id))
+				continue
+			}
+			switches := make([]string, 0, len(aggRes.Buckets))
+			for _, b := range aggRes.Buckets {
+				switches = append(switches, dictSwitchFilter.getValue(f.Id, b.Key))
+			}
+
+			sort.Strings(switches)
+			filters = append(filters, &product.Filter{
+				Id:   f.Id,
+				Name: f.Name,
+				Value: &product.Filter_SwitchFilter{
+					SwitchFilter: &product.SwitchFilter{
+						Switches: switches,
 					},
 				},
 			})

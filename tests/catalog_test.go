@@ -39,10 +39,18 @@ func TestCatalogFlow(t *testing.T) {
 			//		Max: 6,
 			//	}},
 			//},
+			//{
+			//	Id: "rating",
+			//	Value: &product.Filter_SwitchFilter{
+			//		SwitchFilter: &product.SwitchFilter{
+			//			Switches: []string{"от ★★★★☆"},
+			//		},
+			//	},
+			//},
 		},
-		TextSearch: "Auriga",
-		Token:      0,
-		Limit:      4,
+		//TextSearch: "Auriga",
+		Token: 0,
+		Limit: 4,
 	})
 	_, _ = searchResp, err
 

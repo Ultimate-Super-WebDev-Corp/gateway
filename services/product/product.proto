@@ -57,11 +57,16 @@ message Filter {
   oneof Value {
     ListFilter ListFilter = 4;
     RangeFilter RangeFilter = 5;
+    SwitchFilter SwitchFilter = 6;
   }
 }
 
 message ListFilter {
-  repeated string List = 1;
+  repeated string Items = 1;
+}
+
+message SwitchFilter {
+  repeated string Switches = 1;
 }
 
 message RangeFilter {
