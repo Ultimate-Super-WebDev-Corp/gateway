@@ -1,7 +1,7 @@
 syntax = "proto3";
-package model;
+package general;
 
-option go_package = "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/model";
+option go_package = "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/general";
 
 message Session {
   string Id = 1;

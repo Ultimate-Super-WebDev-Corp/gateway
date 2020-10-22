@@ -11,19 +11,19 @@ import (
 	"github.com/ulule/deepcopier"
 	"go.uber.org/zap"
 
-	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/model"
+	"github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/general"
 )
 
 const mdToken = "token"
 
 type sessionClaims struct {
 	jwt.StandardClaims
-	model.Session
+	general.Session
 }
 
 const sessionTTL = 15 * time.Minute
 
-func (s Server) getSession(md map[string][]string) (*model.Session, error) {
+func (s Server) getSession(md map[string][]string) (*general.Session, error) {
 	strToken := md[mdToken]
 	if len(strToken) == 0 {
 		return nil, errors.New("authorization token is not provided")
@@ -71,7 +71,7 @@ var ctxSessionMarkerKey = &ctxSessionMarker{}
 
 type ctxSessionMarker struct{}
 
-func sessionToCtx(ctx context.Context, session *model.Session) context.Context {
+func sessionToCtx(ctx context.Context, session *general.Session) context.Context {
 	ctxzap.AddFields(ctx,
 		zap.String("session_id", session.Id),
 		zap.Int64("customer_id", session.CustomerId))
@@ -79,33 +79,33 @@ func sessionToCtx(ctx context.Context, session *model.Session) context.Context {
 	return context.WithValue(ctx, ctxSessionMarkerKey, session)
 }
 
-func SessionInCtxUpdate(ctx context.Context, newSession *model.Session) {
+func SessionInCtxUpdate(ctx context.Context, newSession *general.Session) {
 	session := SessionFromCtx(ctx)
 	_ = deepcopier.Copy(newSession).To(session)
 	session.UpdatedAt = time.Now().UTC().UnixNano()
 }
 
-func SessionFromCtx(ctx context.Context) *model.Session {
-	session, ok := ctx.Value(ctxSessionMarkerKey).(*model.Session)
+func SessionFromCtx(ctx context.Context) *general.Session {
+	session, ok := ctx.Value(ctxSessionMarkerKey).(*general.Session)
 	if !ok || session == nil {
-		return &model.Session{} //todo return error?
+		return &general.Session{} //todo return error?
 	}
 	return session
 }
 
-func IsSessionLoggedIn(s *model.Session) bool {
+func IsSessionLoggedIn(s *general.Session) bool {
 	return s.CustomerId > 0
 }
-func IsSessionRoot(s *model.Session) bool {
+func IsSessionRoot(s *general.Session) bool {
 	return s.CustomerId > 0 && s.CustomerId < 1000 && s.PasswordId == -1
 
 }
-func SessionLogout(s *model.Session) {
+func SessionLogout(s *general.Session) {
 	s.CustomerId = 0
 	s.PasswordId = 0
 }
 
-func SessionLogin(s *model.Session, cusId int64, passId int64) {
+func SessionLogin(s *general.Session, cusId int64, passId int64) {
 	s.CustomerId = cusId
 	s.PasswordId = passId
 }
