@@ -40,7 +40,7 @@ message GetByIDRequest {
 message CatalogRequest {
   repeated Sort Sorts = 1;
   repeated Filter Filters = 2;
-  string CategoryId = 3;
+  string SelectedCategoryId = 3;
   string TextSearch = 4;
   uint64 Token = 5;
   uint64 Limit = 6;
