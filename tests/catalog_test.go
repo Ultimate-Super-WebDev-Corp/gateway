@@ -22,16 +22,35 @@ func TestCatalogFlow(t *testing.T) {
 	defer conn.Close()
 	productCli := product.NewProductClient(conn)
 
-	searchResp, err := productCli.Catalog(ctx, &product.CatalogRequest{
+	searchResp, err := productCli.CatalogMeta(ctx, &product.CatalogMetaRequest{
 		Filters: []*product.Filter{
-			//{
-			//	Id: "brand",
-			//	Value: &product.Filter_ListFilter{
-			//		ListFilter: &product.ListFilter{
-			//			List: []string{"MAKEUP"},
-			//		},
-			//	},
-			//},
+			{
+				Id: "brand",
+				Value: &product.Filter_ListFilter{
+					ListFilter: &product.ListFilter{
+						SelectedItems: []string{"Biolage"},
+					},
+				},
+			},
+			{
+				Id: "votes",
+				Value: &product.Filter_RangeFilter{
+					RangeFilter: &product.RangeFilter{
+						SelectedValue: &product.RangeValue{
+							Max: 130,
+							Min: 130,
+						},
+					},
+				},
+			},
+			{
+				Id: "rating",
+				Value: &product.Filter_SwitchFilter{
+					SwitchFilter: &product.SwitchFilter{
+						SelectedSwitch: "от ★★☆☆☆",
+					},
+				},
+			},
 			//{
 			//	Id: "rating",
 			//	Value: &product.Filter_RangeFilter{RangeFilter: &product.RangeFilter{
@@ -49,8 +68,8 @@ func TestCatalogFlow(t *testing.T) {
 			//},
 		},
 		//TextSearch: "Auriga",
-		Token: 0,
-		Limit: 4,
+		//Token: 0,
+		//Limit: 4,
 	})
 	_, _ = searchResp, err
 

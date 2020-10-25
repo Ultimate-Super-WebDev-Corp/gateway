@@ -12,6 +12,7 @@ service Product {
   rpc Create (ProductMsg) returns(google.protobuf.Empty) {}
   rpc GetByID (GetByIDRequest) returns (ProductWithID){}
   rpc Catalog (CatalogRequest) returns (CatalogResponse){}
+  rpc CatalogMeta (CatalogMetaRequest) returns (CatalogMetaResponse){}
 }
 
 message SearchByUUIDsRequest {
@@ -45,6 +46,12 @@ message CatalogRequest {
   uint64 Limit = 6;
 }
 
+message CatalogMetaRequest {
+  repeated Filter Filters = 1;
+  string SelectedCategoryId = 2;
+  string TextSearch = 3;
+}
+
 message Sort {
   string Id = 1;
   string Name = 2;
@@ -62,26 +69,36 @@ message Filter {
 }
 
 message ListFilter {
-  repeated string Items = 1;
+  repeated string AvailableItems = 1;
+  repeated string SelectedItems = 2;
 }
 
 message SwitchFilter {
-  repeated string Switches = 1;
+  repeated string AvailableSwitches = 1;
+  string SelectedSwitch = 2;
 }
 
 message RangeFilter {
+  RangeValue AvailableValue = 1;
+  RangeValue SelectedValue = 2;
+}
+
+message RangeValue {
   int64 Min = 1;
   int64 Max = 2;
 }
 
 message CatalogResponse {
   repeated CatalogProduct Products = 1;
-  repeated Filter Filters = 2;
-  repeated Category Categories = 3;
-  repeated Sort Sorts = 4;
-  uint64 NextToken = 5;
+  uint64 NextToken = 2;
+  uint64 Total = 3;
 }
 
+message CatalogMetaResponse {
+  repeated Filter Filters = 1;
+  repeated Category Categories = 2;
+  repeated Sort Sorts = 3;
+}
 
 message CatalogProduct {
   uint64 Id = 1;

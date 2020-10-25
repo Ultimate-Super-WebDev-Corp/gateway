@@ -60,12 +60,15 @@ func (s gteSwitchFilterValue) getValue(value interface{}) string {
 }
 
 func (s gteSwitchFilterValue) getEQuery(filterId string, sw string) elastic.Query {
-	var key review.Rating
+	key := review.Rating(1000) // invalid rating value
 	for k, v := range s {
-		if v == sw {
+		if v == sw && key > k {
 			key = k
-			break
 		}
+	}
+
+	if key == 1000 {
+		return nil
 	}
 
 	return elastic.NewRangeQuery(filterId).Gte(key)

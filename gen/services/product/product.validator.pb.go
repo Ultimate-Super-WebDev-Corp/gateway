@@ -67,6 +67,16 @@ func (this *CatalogRequest) Validate() error {
 	}
 	return nil
 }
+func (this *CatalogMetaRequest) Validate() error {
+	for _, item := range this.Filters {
+		if item != nil {
+			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
+				return github_com_mwitkow_go_proto_validators.FieldError("Filters", err)
+			}
+		}
+	}
+	return nil
+}
 func (this *Sort) Validate() error {
 	return nil
 }
@@ -101,6 +111,19 @@ func (this *SwitchFilter) Validate() error {
 	return nil
 }
 func (this *RangeFilter) Validate() error {
+	if this.AvailableValue != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.AvailableValue); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("AvailableValue", err)
+		}
+	}
+	if this.SelectedValue != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.SelectedValue); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("SelectedValue", err)
+		}
+	}
+	return nil
+}
+func (this *RangeValue) Validate() error {
 	return nil
 }
 func (this *CatalogResponse) Validate() error {
@@ -111,6 +134,9 @@ func (this *CatalogResponse) Validate() error {
 			}
 		}
 	}
+	return nil
+}
+func (this *CatalogMetaResponse) Validate() error {
 	for _, item := range this.Filters {
 		if item != nil {
 			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
