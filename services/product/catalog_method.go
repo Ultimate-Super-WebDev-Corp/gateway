@@ -74,11 +74,11 @@ func applySorts(msg *product.CatalogRequest, searchReq *elastic.SearchService) *
 }
 
 func applyFilters(ctx context.Context, msg *product.CatalogRequest, searchReq *elastic.SearchService) *elastic.SearchService {
-	eFilters, eMust := buildEFiltersAndEMust(ctx, msg.Filters, msg.CategoryId, msg.TextSearch)
+	eFilters, eMust := buildEFiltersAndEMust(ctx, msg.Filters, msg.SelectedCategoryId, msg.TextSearch)
 	return searchReq.Query(elastic.NewBoolQuery().Filter(eFilters...).Must(eMust...))
 }
 
-func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, categoryId string, textSearch string, excludeFilterIds ...string) (eFilters []elastic.Query, eMust []elastic.Query) {
+func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, selectedCategoryId string, textSearch string, excludeFilterIds ...string) (eFilters []elastic.Query, eMust []elastic.Query) {
 	eMust = make([]elastic.Query, 0, 1)
 	eFilters = make([]elastic.Query, 0, len(filters)+1)
 	eFilters = append(eFilters, elastic.MatchAllQuery{})
@@ -123,10 +123,10 @@ func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, categ
 		}
 	}
 
-	if categoryId != "" {
+	if selectedCategoryId != "" {
 		eFilters = append(
 			eFilters,
-			elastic.NewMatchQuery(getEFilterField(fieldCategories), categoryId),
+			elastic.NewMatchQuery(getEFilterField(fieldCategories), selectedCategoryId),
 		)
 	}
 
