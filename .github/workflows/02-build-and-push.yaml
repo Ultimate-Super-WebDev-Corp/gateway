@@ -6,6 +6,8 @@ jobs:
     env:
       BRANCH_NAME: ${{ github.head_ref }}
     steps:
+      - name: checkout
+        uses: actions/checkout@v2
       - name: pwd
         run: pwd
       - name: ls
