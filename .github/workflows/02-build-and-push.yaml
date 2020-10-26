@@ -15,3 +15,5 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: build
         run: make build tag=${BUILD_TAG}
+      - name: push
+        run: make push tag=${BUILD_TAG}
