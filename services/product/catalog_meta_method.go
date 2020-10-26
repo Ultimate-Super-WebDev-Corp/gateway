@@ -132,7 +132,16 @@ func buildMapSelectedFilters(ctx context.Context, filters []*product.Filter) (
 	for _, f := range filters {
 		switch v := f.Value.(type) {
 		case *product.Filter_ListFilter:
-			selectedListFilters[f.Id] = v.ListFilter.SelectedItems
+			setSelectedItems := map[string]struct{}{}
+			selectedItems := make([]string, 0, len(v.ListFilter.SelectedItems))
+			for _, item := range v.ListFilter.SelectedItems {
+				if _, ok := setSelectedItems[item]; ok {
+					continue
+				}
+				setSelectedItems[item] = struct{}{}
+				selectedItems = append(selectedItems, item)
+			}
+			selectedListFilters[f.Id] = selectedItems
 		case *product.Filter_RangeFilter:
 			selectedRangeFilters[f.Id] = v.RangeFilter.SelectedValue
 		case *product.Filter_SwitchFilter:
