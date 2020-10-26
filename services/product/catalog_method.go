@@ -104,7 +104,6 @@ func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, selec
 		switch v := uf.Value.(type) {
 		case *product.Filter_ListFilter:
 			if len(v.ListFilter.SelectedItems) == 0 {
-				ctxzap.Extract(ctx).Warn("empty selected", zap.String("filter", f.Id))
 				continue
 			}
 
@@ -114,7 +113,6 @@ func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, selec
 			)
 		case *product.Filter_RangeFilter:
 			if v.RangeFilter.SelectedValue == nil {
-				ctxzap.Extract(ctx).Warn("empty selected", zap.String("filter", f.Id))
 				continue
 			}
 
@@ -124,7 +122,6 @@ func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, selec
 			)
 		case *product.Filter_SwitchFilter:
 			if len(v.SwitchFilter.SelectedSwitch) == 0 {
-				ctxzap.Extract(ctx).Warn("empty selected", zap.String("filter", f.Id))
 				continue
 			}
 
