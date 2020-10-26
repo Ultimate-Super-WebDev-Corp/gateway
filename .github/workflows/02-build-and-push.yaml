@@ -13,4 +13,4 @@ jobs:
       - name: ls
         run: ls
       - name: build
-        run: make build tag=$BRANCH_NAME
+        run: echo $BRANCH_NAME
