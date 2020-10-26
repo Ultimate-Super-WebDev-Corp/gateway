@@ -1,0 +1,10 @@
+name: build-and-push
+on: push
+jobs:
+  build-and-push-job:
+    runs-on: ubuntu-latest
+    env:
+      BRANCH_NAME: ${{ github.head_ref }}
+    steps:
+      - name: build
+        run: make build tag=BRANCH_NAME
