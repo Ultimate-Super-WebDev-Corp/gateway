@@ -7,4 +7,4 @@ jobs:
       BRANCH_NAME: ${{ github.head_ref }}
     steps:
       - name: build
-        run: make build tag=BRANCH_NAME
+        run: make build tag=$BRANCH_NAME
