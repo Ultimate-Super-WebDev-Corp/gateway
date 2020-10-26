@@ -8,5 +8,7 @@ jobs:
     steps:
       - name: pwd
         run: pwd
+      - name: ls
+        run: ls
       - name: build
         run: make build tag=$BRANCH_NAME
