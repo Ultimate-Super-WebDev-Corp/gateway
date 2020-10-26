@@ -3,14 +3,14 @@ on: push
 jobs:
   build-and-push-job:
     runs-on: ubuntu-latest
-    env:
-      BRANCH_NAME: ${{ github.head_ref }}
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - name: get-branch-name
+        uses: nelonoel/branch-name@v1
       - name: pwd
         run: pwd
       - name: ls
         run: ls
       - name: build
-        run: echo $BRANCH_NAME
+        run: echo ${BRANCH_NAME}
