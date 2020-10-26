@@ -6,5 +6,7 @@ jobs:
     env:
       BRANCH_NAME: ${{ github.head_ref }}
     steps:
+      - name: pwd
+        run: pwd
       - name: build
         run: make build tag=$BRANCH_NAME
