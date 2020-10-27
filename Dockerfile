@@ -6,6 +6,7 @@ WORKDIR $GOPATH/github.com/Ultimate-Super-WebDev-Corp/gateway
 COPY . .
 
 RUN go mod download
+RUN go test -cover ./...
 RUN go build -o /go/bin/gateway
 
 FROM alpine
