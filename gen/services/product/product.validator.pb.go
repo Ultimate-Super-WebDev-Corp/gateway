@@ -51,13 +51,6 @@ func (this *GetByIDRequest) Validate() error {
 	return nil
 }
 func (this *CatalogRequest) Validate() error {
-	for _, item := range this.Sorts {
-		if item != nil {
-			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {
-				return github_com_mwitkow_go_proto_validators.FieldError("Sorts", err)
-			}
-		}
-	}
 	for _, item := range this.Filters {
 		if item != nil {
 			if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(item); err != nil {

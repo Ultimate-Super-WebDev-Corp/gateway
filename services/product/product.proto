@@ -38,7 +38,7 @@ message GetByIDRequest {
 }
 
 message CatalogRequest {
-  repeated Sort Sorts = 1;
+  string SelectedSortId = 1;
   repeated Filter Filters = 2;
   string SelectedCategoryId = 3;
   string TextSearch = 4;
@@ -49,7 +49,8 @@ message CatalogRequest {
 message CatalogMetaRequest {
   repeated Filter Filters = 1;
   string SelectedCategoryId = 2;
-  string TextSearch = 3;
+  string SelectedSortId = 3;
+  string TextSearch = 4;
 }
 
 message Sort {
@@ -98,6 +99,7 @@ message CatalogMetaResponse {
   repeated Filter Filters = 1;
   repeated Category Categories = 2;
   repeated Sort Sorts = 3;
+  string SelectedSortId = 4;
 }
 
 message CatalogProduct {

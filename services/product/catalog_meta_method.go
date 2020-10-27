@@ -27,9 +27,10 @@ func (p Product) CatalogMeta(ctx context.Context, msg *product.CatalogMetaReques
 	}
 
 	return &product.CatalogMetaResponse{
-		Filters:    buildFilters(ctx, msg.Filters, searchRes),
-		Categories: buildCategories(ctx, msg.SelectedCategoryId, searchRes),
-		Sorts:      dictSorts,
+		Filters:        buildFilters(ctx, msg.Filters, searchRes),
+		Categories:     buildCategories(ctx, msg.SelectedCategoryId, searchRes),
+		Sorts:          dictSorts,
+		SelectedSortId: msg.SelectedSortId,
 	}, nil
 }
 

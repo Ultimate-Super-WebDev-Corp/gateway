@@ -39,33 +39,16 @@ func applySorts(msg *product.CatalogRequest, searchReq *elastic.SearchService) *
 		searchReq = searchReq.Sort(fieldScore, false)
 	}
 
-	mapUniqueSorts := map[string]struct{}{}
-	uniqueSorts := make([]string, 0, len(msg.Sorts))
-	for _, s := range msg.Sorts {
-		if _, ok := mapUniqueSorts[s.Id]; ok {
-			continue
-		}
-		mapUniqueSorts[s.Id] = struct{}{}
-		uniqueSorts = append(uniqueSorts, s.Id)
-	}
-
-	clearSorts := map[string]*product.Sort{}
+	wasSort := false
 	for _, s := range dictSorts {
-		if _, ok := mapUniqueSorts[s.Id]; !ok {
-			continue
+		if s.Id == msg.SelectedSortId {
+			wasSort = true
+			searchReq = searchReq.Sort(s.Id, s.Ascending)
+			break
 		}
-		clearSorts[s.Id] = s
 	}
 
-	for _, id := range uniqueSorts {
-		cs, ok := clearSorts[id]
-		if !ok {
-			continue
-		}
-		searchReq = searchReq.Sort(cs.Id, cs.Ascending)
-	}
-
-	if len(clearSorts) == 0 {
+	if !wasSort {
 		searchReq = searchReq.Sort(defaultSort.Id, defaultSort.Ascending)
 	}
 
