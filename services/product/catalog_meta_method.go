@@ -29,8 +29,8 @@ func (p Product) CatalogMeta(ctx context.Context, msg *product.CatalogMetaReques
 	return &product.CatalogMetaResponse{
 		Filters:        buildFilters(ctx, msg.Filters, searchRes),
 		Categories:     buildCategories(ctx, msg.SelectedCategoryId, searchRes),
-		Sorts:          dictSorts,
-		SelectedSortId: msg.SelectedSortId,
+		AvailableSorts: dictSorts,
+		SelectedSort:   buildSelectedSort(msg.SelectedSort),
 	}, nil
 }
 
@@ -274,4 +274,11 @@ func buildCategories(ctx context.Context, categoryId string, searchRes *elastic.
 		})
 	}
 	return categories
+}
+
+func buildSelectedSort(selectedSort *product.Sort) *product.Sort {
+	if selectedSort == nil {
+		return defaultSort
+	}
+	return selectedSort
 }

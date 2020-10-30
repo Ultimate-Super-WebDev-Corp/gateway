@@ -39,17 +39,12 @@ func applySorts(msg *product.CatalogRequest, searchReq *elastic.SearchService) *
 		searchReq = searchReq.Sort(fieldScore, false)
 	}
 
-	wasSort := false
+	selectedSort := buildSelectedSort(msg.SelectedSort)
 	for _, s := range dictSorts {
-		if s.Id == msg.SelectedSortId {
-			wasSort = true
+		if s.Id == selectedSort.Id {
 			searchReq = searchReq.Sort(s.Id, s.Ascending)
 			break
 		}
-	}
-
-	if !wasSort {
-		searchReq = searchReq.Sort(defaultSort.Id, defaultSort.Ascending)
 	}
 
 	searchReq = searchReq.Sort(fieldId, true)
