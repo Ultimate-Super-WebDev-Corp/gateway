@@ -194,6 +194,10 @@ func buildRangeFilterAvailableValue(ctx context.Context, id string, searchRes *e
 		return nil
 	}
 
+	if bucket.DocCount == 0 {
+		return nil
+	}
+
 	aggResMax, ok := bucket.Aggregations.Max(makeFilterRangeMaxName(id))
 	if !ok {
 		ctxzap.Extract(ctx).Warn("filter not found", zap.String("filter", id))
