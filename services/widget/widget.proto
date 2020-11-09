@@ -7,9 +7,13 @@ import "google/protobuf/empty.proto";
 
 service Widget {
   rpc MainPage (google.protobuf.Empty) returns (HtmlBody) {}
+  rpc ProductPrice (ProductPriceRequest) returns (HtmlBody) {}
 }
 
 message HtmlBody {
   bytes Body = 1;
 }
 
+message ProductPriceRequest {
+  uint64 ProductID = 5;
+}

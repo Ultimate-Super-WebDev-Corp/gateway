@@ -18,3 +18,6 @@ var _ = math.Inf
 func (this *HtmlBody) Validate() error {
 	return nil
 }
+func (this *ProductPriceRequest) Validate() error {
+	return nil
+}
