@@ -1,0 +1,15 @@
+syntax = "proto3";
+package widget;
+
+option go_package = "github.com/Ultimate-Super-WebDev-Corp/gateway/gen/services/widget";
+
+import "google/protobuf/empty.proto";
+
+service Widget {
+  rpc MainPage (google.protobuf.Empty) returns (HtmlBody) {}
+}
+
+message HtmlBody {
+  bytes Body = 1;
+}
+
