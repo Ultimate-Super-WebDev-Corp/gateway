@@ -35,11 +35,11 @@ func (p Product) Catalog(ctx context.Context, msg *product.CatalogRequest) (*pro
 }
 
 func applySorts(msg *product.CatalogRequest, searchReq *elastic.SearchService) *elastic.SearchService {
-	if msg.TextSearch != "" {
+	if msg.Meta.TextSearch != "" {
 		searchReq = searchReq.Sort(fieldScore, false)
 	}
 
-	selectedSort := buildSelectedSort(msg.SelectedSort)
+	selectedSort := buildSelectedSort(msg.Meta.SelectedSort)
 	for _, s := range dictSorts {
 		if s.Id == selectedSort.Id {
 			searchReq = searchReq.Sort(s.Id, s.Ascending)
@@ -52,13 +52,13 @@ func applySorts(msg *product.CatalogRequest, searchReq *elastic.SearchService) *
 }
 
 func applyFilters(ctx context.Context, msg *product.CatalogRequest, searchReq *elastic.SearchService) *elastic.SearchService {
-	eFilters, eMust := buildEFiltersAndEMust(ctx, msg.Filters, msg.SelectedCategoryId, msg.TextSearch)
+	eFilters, eMust := buildEFiltersAndEMust(ctx, msg.Meta)
 	return searchReq.Query(elastic.NewBoolQuery().Filter(eFilters...).Must(eMust...))
 }
 
-func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, selectedCategoryId string, textSearch string, excludeFilterIds ...string) (eFilters []elastic.Query, eMust []elastic.Query) {
+func buildEFiltersAndEMust(ctx context.Context, meta *product.CatalogMetaRequest, excludeFilterIds ...string) (eFilters []elastic.Query, eMust []elastic.Query) {
 	eMust = make([]elastic.Query, 0, 1)
-	eFilters = make([]elastic.Query, 0, len(filters)+1)
+	eFilters = make([]elastic.Query, 0, len(meta.Filters)+1)
 	eFilters = append(eFilters, elastic.MatchAllQuery{})
 
 	mapExcludeFilterIds := map[string]struct{}{}
@@ -67,7 +67,7 @@ func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, selec
 	}
 
 	uniqueFilters := map[string]*product.Filter{}
-	for _, f := range filters {
+	for _, f := range meta.Filters {
 		if _, ok := mapExcludeFilterIds[f.Id]; ok {
 			continue
 		}
@@ -113,15 +113,23 @@ func buildEFiltersAndEMust(ctx context.Context, filters []*product.Filter, selec
 		}
 	}
 
-	if selectedCategoryId != "" {
+	if meta.SelectedCategoryId != "" {
 		eFilters = append(
 			eFilters,
-			elastic.NewMatchQuery(getEFilterField(fieldCategories), selectedCategoryId),
+			elastic.NewMatchQuery(getEFilterField(fieldCategories), meta.SelectedCategoryId),
 		)
 	}
 
-	if textSearch != "" {
-		eMust = append(eMust, makeTextSearchQuery(textSearch))
+	if meta.TextSearch != "" {
+		eMust = append(eMust, makeTextSearchQuery(meta.TextSearch))
+	}
+
+	productIDs := make([]interface{}, 0, len(meta.ProductIDs))
+	for _, productID := range meta.ProductIDs {
+		productIDs = append(productIDs, productID)
+	}
+	if len(productIDs) > 0 {
+		eFilters = append(eFilters, elastic.NewTermsQuery(fieldId, productIDs...))
 	}
 
 	return eFilters, eMust

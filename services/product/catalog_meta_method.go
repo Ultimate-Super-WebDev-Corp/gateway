@@ -36,7 +36,7 @@ func (p Product) CatalogMeta(ctx context.Context, msg *product.CatalogMetaReques
 
 func applyAggregations(ctx context.Context, msg *product.CatalogMetaRequest, searchReq *elastic.SearchService) *elastic.SearchService {
 	for _, f := range dictFilters {
-		eFilters, eMust := buildEFiltersAndEMust(ctx, msg.Filters, msg.SelectedCategoryId, msg.TextSearch, f.Id)
+		eFilters, eMust := buildEFiltersAndEMust(ctx, msg, f.Id)
 		agg := elastic.NewFiltersAggregation().Filter(elastic.NewBoolQuery().Filter(eFilters...).Filter(eMust...))
 		switch f.Value.(type) {
 		case *product.Filter_ListFilter:
@@ -54,7 +54,7 @@ func applyAggregations(ctx context.Context, msg *product.CatalogMetaRequest, sea
 		searchReq = searchReq.Aggregation(f.Id, agg)
 	}
 
-	eFilters, eMust := buildEFiltersAndEMust(ctx, msg.Filters, msg.SelectedCategoryId, msg.TextSearch)
+	eFilters, eMust := buildEFiltersAndEMust(ctx, msg)
 
 	return searchReq.Aggregation(fieldCategories, elastic.NewFiltersAggregation().Filter(elastic.NewBoolQuery().Filter(eFilters...).Filter(eMust...)).
 		SubAggregation(fieldCategories, elastic.NewTermsAggregation().Field(getEFilterField(fieldCategories))))

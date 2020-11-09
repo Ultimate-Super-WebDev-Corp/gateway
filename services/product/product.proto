@@ -25,7 +25,7 @@ message ProductMsg {
   string Description = 3 [(validator.field) = {string_not_empty: true}];
   repeated string CategoryIds = 4;
   repeated string Images = 5;
-  string country = 6;
+  string Country = 6;
 }
 
 message ProductWithID {
@@ -38,19 +38,17 @@ message GetByIDRequest {
 }
 
 message CatalogRequest {
+  CatalogMetaRequest Meta = 1;
+  uint64 Token = 2;
+  uint64 Limit = 3;
+}
+
+message CatalogMetaRequest {
   Sort SelectedSort = 1;
   repeated Filter Filters = 2;
   string SelectedCategoryId = 3;
   string TextSearch = 4;
-  uint64 Token = 5;
-  uint64 Limit = 6;
-}
-
-message CatalogMetaRequest {
-  repeated Filter Filters = 1;
-  string SelectedCategoryId = 2;
-  Sort SelectedSort = 3;
-  string TextSearch = 4;
+  repeated uint64 ProductIDs = 5;
 }
 
 message Sort {
